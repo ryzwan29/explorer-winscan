@@ -9,6 +9,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { getTranslation } from '@/lib/i18n';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import WinScanLogo from '@/components/WinScanLogo';
+import Footer from '@/components/Footer';
 
 export default function Home() {
   const [chains, setChains] = useState<ChainData[]>([]);
@@ -240,14 +241,7 @@ export default function Home() {
         )}
       </main>
 
-      <footer className="border-t border-gray-800/30 backdrop-blur-xl bg-black/40 py-6 relative z-10">
-        <div className="container mx-auto px-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-3 text-sm text-gray-500">
-            <p dangerouslySetInnerHTML={{ __html: t('home.footer') }} />
-            <span>{t('home.multiChain')}</span>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

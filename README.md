@@ -38,7 +38,7 @@
 
 2. **Clone your forked repository**
 ```bash
-git clone https://github.com/YOUR_USERNAME/winscan.git
+git clone https://github.com/winsnip-official/winscan.git
 cd winscan
 ```
 

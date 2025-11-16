@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import { ChainData } from '@/types/chain';
 import { Activity, Box, Users, TrendingUp } from 'lucide-react';
 import TokenomicsChart from '@/components/TokenomicsChart';
@@ -444,6 +445,7 @@ export default function ChainOverviewPage() {
             </>
           )}
         </main>
+        <Footer />
       </div>
     </div>
   );
