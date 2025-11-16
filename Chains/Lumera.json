@@ -13,10 +13,6 @@
         {
             "address": "https://lumera-rest.stakerhouse.com",
             "provider": "StakerHouse"
-        },
-        {
-            "address": "https://rest.lumera.archive.data.nexus",
-            "provider": "Data Nexus"
         }
     ],
     "rpc": [
@@ -31,10 +27,6 @@
         {
             "address": "https://lumera-rpc.stakerhouse.com",
             "provider": "StakerHouse"
-        },
-        {
-            "address": "https://lumera.archive.data.nexus",
-            "provider": "Data Nexus"
         }
     ],
     "sdk_version": "0.50.12",
