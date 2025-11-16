@@ -48,10 +48,16 @@ jobs:
           # Try to merge main into test branch
           if git merge origin/main --no-commit --no-ff; then
             echo "✅ Merge test successful - no conflicts"
-            git merge --abort
+            # Only abort if there's an actual merge in progress
+            if [ -f .git/MERGE_HEAD ]; then
+              git merge --abort
+            fi
           else
             echo "❌ Merge test failed - conflicts detected"
-            git merge --abort
+            # Only abort if there's an actual merge in progress
+            if [ -f .git/MERGE_HEAD ]; then
+              git merge --abort
+            fi
             exit 1
           fi
 
