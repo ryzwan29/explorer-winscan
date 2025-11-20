@@ -255,19 +255,163 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please follow these guidelines:
+We welcome contributions from the community! Here's how to get started:
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+### For Contributors
 
-**Contribution Rules:**
-- Follow existing code style
-- Write clear commit messages
-- Update documentation if needed
-- Test your changes before submitting
+#### 🔧 Setup Development Environment
+
+1. **Fork this repository**
+   - Click the "Fork" button at the top right
+   - This creates your own copy of the repository
+
+2. **Clone your fork**
+   ```bash
+   git clone https://github.com/YOUR-USERNAME/winscan.git
+   cd winscan
+   ```
+
+3. **Add upstream remote**
+   ```bash
+   git remote add upstream https://github.com/winsnip-official/winscan.git
+   ```
+
+4. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+#### 📝 Development Workflow
+
+1. **Switch to dev branch** (IMPORTANT!)
+   ```bash
+   git checkout dev
+   ```
+
+2. **ALWAYS pull latest changes before starting work**
+   ```bash
+   git pull origin dev
+   ```
+
+3. **Create a feature branch**
+   ```bash
+   git checkout -b feature/your-feature-name
+   # or
+   git checkout -b fix/bug-description
+   ```
+
+4. **Make your changes**
+   - Write clean, readable code
+   - Follow existing code style
+   - Add comments where necessary
+
+5. **Test your changes**
+   ```bash
+   npm run dev    # Test in development
+   npm run build  # Ensure it builds successfully
+   ```
+
+6. **Commit your changes**
+   ```bash
+   git add .
+   git commit -m "feat: add amazing feature"
+   # or
+   git commit -m "fix: resolve issue with..."
+   ```
+
+7. **Pull again before pushing** (avoid conflicts)
+   ```bash
+   git pull origin dev
+   ```
+
+8. **Push to your fork**
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+
+9. **Create Pull Request**
+   - Go to your fork on GitHub
+   - Click "Pull Request" button
+   - Target: `winsnip-official/winscan` branch `dev`
+   - Describe your changes clearly
+
+### 🌿 Branch Strategy
+
+- **`main`** - Production branch (stable releases only)
+- **`dev`** - Development branch (active development)
+- **`feature/*`** - New features
+- **`fix/*`** - Bug fixes
+
+**⚠️ IMPORTANT:** Always work on `dev` branch, never push directly to `main`!
+
+### ✅ Contribution Guidelines
+
+**Code Quality:**
+- Follow TypeScript best practices
+- Use meaningful variable/function names
+- Keep functions small and focused
+- Add proper type definitions
+
+**Commit Messages:**
+- Use conventional commits format:
+  - `feat:` - New feature
+  - `fix:` - Bug fix
+  - `docs:` - Documentation changes
+  - `style:` - Code style changes (formatting)
+  - `refactor:` - Code refactoring
+  - `test:` - Adding tests
+  - `chore:` - Maintenance tasks
+
+**Examples:**
+```bash
+git commit -m "feat: add wallet integration with Keplr"
+git commit -m "fix: resolve balance display issue"
+git commit -m "docs: update contributing guidelines"
+```
+
+**Testing:**
+- Test your changes thoroughly
+- Check responsive design (mobile, tablet, desktop)
+- Test on different browsers if possible
+- Ensure no console errors
+
+**Pull Request:**
+- Clear title and description
+- Link related issues
+- Add screenshots/videos if UI changes
+- Wait for review before merging
+
+### 🚫 What NOT to Do
+
+- ❌ Don't push directly to `main` branch
+- ❌ Don't commit `node_modules/` or `.env` files
+- ❌ Don't make too many unrelated changes in one PR
+- ❌ Don't ignore ESLint warnings
+- ❌ Don't forget to pull before pushing
+
+### 🎯 Good First Issues
+
+Looking for where to start? Check out issues labeled:
+- `good first issue` - Easy tasks for beginners
+- `help wanted` - Community help needed
+- `bug` - Bug fixes needed
+- `enhancement` - Feature requests
+
+### 💡 Need Help?
+
+- 💬 Ask in [Telegram Group](https://t.me/winsnip)
+- 📧 Email: admin@winsnip.xyz
+- 🐛 Create an issue on GitHub
+
+### 🏆 Contributors
+
+Thank you to all our amazing contributors! 🎉
+
+<a href="https://github.com/winsnip-official/winscan/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=winsnip-official/winscan" />
+</a>
+
+**Want to see your name here?** Start contributing today!
 
 ## 📞 Support & Community
 
