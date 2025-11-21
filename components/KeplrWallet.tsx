@@ -25,7 +25,17 @@ export default function KeplrWallet({ selectedChain }: KeplrWalletProps) {
   useEffect(() => {
     const handleTriggerConnect = () => {
       if (!isConnected) {
-        openCoinTypeModal();
+        if (selectedChain) {
+          openCoinTypeModal();
+        } else {
+          setError('Please wait while chain is loading...');
+          setTimeout(() => {
+            if (selectedChain) {
+              openCoinTypeModal();
+              setError(null);
+            }
+          }, 1000);
+        }
       }
     };
 
@@ -33,7 +43,7 @@ export default function KeplrWallet({ selectedChain }: KeplrWalletProps) {
     return () => {
       window.removeEventListener('trigger_keplr_connect', handleTriggerConnect);
     };
-  }, [isConnected]);
+  }, [isConnected, selectedChain]);
 
   const handleConnect = async (selectedCoinType: 118 | 60) => {
     if (!selectedChain) {

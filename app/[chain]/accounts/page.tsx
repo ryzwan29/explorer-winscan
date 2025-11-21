@@ -351,13 +351,20 @@ export default function AccountsPage() {
       
       console.log('Withdrawing from', validatorAddresses.length, 'validators');
       
+      const baseGas = 200000;
+      const perValidatorGas = 100000;
+      const calculatedGas = baseGas + (validatorAddresses.length * perValidatorGas);
+      const gasLimit = calculatedGas.toString();
+      
+      console.log('Using gas limit:', gasLimit, 'for', validatorAddresses.length, 'validators');
+      
       const result = await executeWithdrawAllValidators(
         selectedChain,
         {
           delegatorAddress: connectedAddress,
           validatorAddresses: validatorAddresses,
         },
-        '500000',
+        gasLimit,
         'Integrate WinScan'
       );
 
