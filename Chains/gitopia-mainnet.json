@@ -17,6 +17,10 @@
     {
       "address": "https://gitopia-api.genznodes.dev",
       "provider": "Genznodes"
+    },
+    {
+      "address": "https://api-gitopia-m.maouam.xyz",
+      "provider": "MaouamNodelab"
     }
   ],
   "rpc": [
@@ -35,6 +39,10 @@
     {
       "address": "https://gitopia-rpc.genznodes.dev",
       "provider": "Genznodes"
+    },
+    {
+      "address": "https://rpc-gitopia-m.maouam.xyz",
+      "provider": "MaouamNodelab"
     }
   ],
   "sdk_version": "0.47.13",
