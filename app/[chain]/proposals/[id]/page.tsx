@@ -10,6 +10,8 @@ import { ArrowLeft, CheckCircle, XCircle, Clock, FileText } from 'lucide-react';
 import { getApiUrl } from '@/lib/config';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getTranslation } from '@/lib/i18n';
+import ValidatorAvatar from '@/components/ValidatorAvatar';
+import { bech32Decode, bech32Encode } from '@/lib/bech32';
 
 interface ProposalDetail {
   id: string;
@@ -36,6 +38,20 @@ interface ProposalDetail {
   messages: any[];
 }
 
+interface ValidatorInfo {
+  address: string;
+  moniker: string;
+  identity?: string;
+  logo?: string;
+}
+
+interface VoteWithValidator {
+  voter: string;
+  option: string;
+  weight: string;
+  validatorInfo?: ValidatorInfo;
+}
+
 export default function ProposalDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -45,6 +61,8 @@ export default function ProposalDetailPage() {
   const [selectedChain, setSelectedChain] = useState<ChainData | null>(null);
   const [proposal, setProposal] = useState<ProposalDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [validators, setValidators] = useState<ValidatorInfo[]>([]);
+  const [votesWithValidators, setVotesWithValidators] = useState<VoteWithValidator[]>([]);
 
   useEffect(() => {
 
@@ -77,25 +95,104 @@ export default function ProposalDetailPage() {
   useEffect(() => {
     if (selectedChain && params?.id) {
       setLoading(true);
-      const endpoint = getApiUrl(`api/proposal?chain=${selectedChain.chain_id || selectedChain.chain_name}&id=${params.id}`);
+      // Use chain_name instead of chain_id for consistency with backend API
+      const endpoint = getApiUrl(`api/proposal?chain=${selectedChain.chain_name}&id=${params.id}`);
+      
+      console.log(`[ProposalDetail] Fetching proposal #${params.id} for ${selectedChain.chain_name}`);
       
       fetch(endpoint)
         .then(res => {
-          if (!res.ok) throw new Error('Proposal not found');
+          if (!res.ok) {
+            console.error(`[ProposalDetail] API returned ${res.status}`);
+            throw new Error('Proposal not found');
+          }
           return res.json();
         })
         .then(data => {
+          console.log(`[ProposalDetail] Successfully loaded proposal #${params.id}`);
           setProposal(data);
           setLoading(false);
         })
         .catch(err => {
-          console.error('Error loading proposal:', err);
+          console.error('[ProposalDetail] Failed to fetch:', err);
           setLoading(false);
         });
     }
   }, [selectedChain, params]);
 
+  // Fetch validators for voter info
+  useEffect(() => {
+    if (!selectedChain) return;
+    
+    const cacheKey = `validators_${selectedChain.chain_name}`;
+    const cached = localStorage.getItem(cacheKey);
+    
+    if (cached) {
+      try {
+        const { data, timestamp } = JSON.parse(cached);
+        if (Date.now() - timestamp < 600000) { // 10 minutes
+          setValidators(data);
+          return;
+        }
+      } catch (e) {}
+    }
+    
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://ssl.winsnip.xyz';
+    fetch(`${API_URL}/api/validators?chain=${selectedChain.chain_name}`)
+      .then(res => res.json())
+      .then(data => {
+        setValidators(data);
+        try {
+          localStorage.setItem(cacheKey, JSON.stringify({ data, timestamp: Date.now() }));
+        } catch (e) {}
+      })
+      .catch(() => {});
+  }, [selectedChain]);
+
+  // Map votes with validator info
+  useEffect(() => {
+    if (!proposal?.votes || validators.length === 0) {
+      setVotesWithValidators(proposal?.votes || []);
+      return;
+    }
+
+    const mapped = proposal.votes.map(vote => {
+      const voterAddr = vote.voter || '';
+      
+      // Find validator by converting operator address to account address
+      const validator = validators.find(v => {
+        const operatorAddr = v.address || '';
+        const accountAddr = convertOperatorToAccount(operatorAddr);
+        return accountAddr === voterAddr;
+      });
+
+      return {
+        ...vote,
+        validatorInfo: validator
+      };
+    });
+
+    setVotesWithValidators(mapped);
+  }, [proposal, validators]);
+
   const chainPath = selectedChain?.chain_name.toLowerCase().replace(/\s+/g, '-') || '';
+
+  // Convert validator operator address to account address
+  const convertOperatorToAccount = (operatorAddress: string): string => {
+    try {
+      const decoded = bech32Decode(operatorAddress);
+      if (!decoded) return '';
+      
+      // Get the prefix without 'valoper' (e.g., 'tellor' from 'tellorvaloper')
+      const accountPrefix = decoded.hrp.replace('valoper', '');
+      
+      // Re-encode with account prefix
+      return bech32Encode(accountPrefix, decoded.data);
+    } catch (e) {
+      console.error('Failed to convert operator address:', e);
+      return '';
+    }
+  };
 
   const getStatusBadge = (status: string) => {
     const statusConfig: { [key: string]: { color: string; icon: any } } = {
@@ -359,22 +456,31 @@ export default function ProposalDetailPage() {
               )}
 
               {/* Recent Votes */}
-              {proposal.votes && proposal.votes.length > 0 && (
+              {votesWithValidators && votesWithValidators.length > 0 && (
                 <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg p-6">
                   <h2 className="text-xl font-bold text-white mb-4">
-                    {t('proposalDetail.recentVotes')} ({proposal.votes.length})
+                    {t('proposalDetail.recentVotes')} ({votesWithValidators.length})
                   </h2>
                   <div className="space-y-3 max-h-96 overflow-y-auto">
-                    {proposal.votes.map((vote, idx) => (
-                      <div key={idx} className="flex items-start justify-between">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs text-gray-300 font-mono truncate">{vote.voter}</p>
+                    {votesWithValidators.map((vote, idx) => (
+                      <div key={idx} className="flex items-center justify-between gap-3 p-3 bg-[#0f0f0f] rounded-lg hover:bg-[#151515] transition-colors">
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <ValidatorAvatar 
+                            identity={vote.validatorInfo?.identity}
+                            moniker={vote.validatorInfo?.moniker || vote.voter}
+                            size="md"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-white truncate">
+                              {vote.validatorInfo?.moniker || vote.voter}
+                            </p>
+                          </div>
                         </div>
-                        <span className={`ml-2 text-xs px-2 py-1 rounded ${
-                          getVoteOption(vote.option).toLowerCase().includes('yes') ? 'bg-green-500/20 text-green-500' :
-                          getVoteOption(vote.option).toLowerCase().includes('no') ? 'bg-red-500/20 text-red-500' :
-                          getVoteOption(vote.option).toLowerCase().includes('abstain') ? 'bg-gray-500/20 text-gray-500' :
-                          'bg-orange-500/20 text-orange-500'
+                        <span className={`ml-2 text-xs font-semibold px-3 py-1.5 rounded-lg whitespace-nowrap ${
+                          getVoteOption(vote.option).toLowerCase().includes('yes') ? 'bg-green-500/20 text-green-400' :
+                          getVoteOption(vote.option).toLowerCase().includes('no') && !getVoteOption(vote.option).toLowerCase().includes('veto') ? 'bg-red-500/20 text-red-400' :
+                          getVoteOption(vote.option).toLowerCase().includes('abstain') ? 'bg-gray-500/20 text-gray-400' :
+                          'bg-orange-500/20 text-orange-400'
                         }`}>
                           {getVoteOption(vote.option)}
                         </span>

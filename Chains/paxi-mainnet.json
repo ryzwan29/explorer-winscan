@@ -5,6 +5,10 @@
     {
       "address": "https://mainnet-lcd.paxinet.io",
       "provider": "Paxi Foundation"
+    },
+    {
+      "address": "https://api-paxi.winnode.xyz",
+      "provider": "Winnode"
     }
   ],
   "rpc": [

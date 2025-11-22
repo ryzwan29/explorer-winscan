@@ -10,7 +10,6 @@ import { getApiUrl } from '@/lib/config';
 import { Vote, CheckCircle, XCircle, Clock, TrendingUp } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getTranslation } from '@/lib/i18n';
-import { fetchProposalsDirectly } from '@/lib/cosmos-client';
 
 interface Proposal {
   id: string;
@@ -82,126 +81,82 @@ export default function ProposalsPage() {
       }
     } catch (e) {}
     
-    // Async fetch with direct LCD support
+    // Fetch proposals through backend API only (avoids CORS issues)
     const fetchProposals = async () => {
       try {
-        // Strategy 1: Try backend API first (faster, cached)
+        // Use backend API with chain_name (not chain_id)
         const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://ssl.winsnip.xyz';
-        const backendUrl = `${API_URL}/api/proposals?chain=${selectedChain.chain_id || selectedChain.chain_name}`;
+        const backendUrl = `${API_URL}/api/proposals?chain=${selectedChain.chain_name}`;
         
-        try {
-          const res = await fetch(backendUrl, {
-            signal: AbortSignal.timeout(8000), // 8 second timeout
-          });
-          
-          if (res.ok) {
-            const data = await res.json();
-            if (Array.isArray(data) && data.length >= 0) {
-              const transformedData = data.map((p: any) => ({
-                id: p.proposal_id || p.id,
-                title: p.content?.title || p.title || `Proposal #${p.proposal_id || p.id}`,
-                status: p.status,
-                type: p.content?.['@type'] || p.messages?.[0]?.['@type'] || p.type || 'Unknown',
-                submitTime: p.submit_time || p.submitTime,
-                votingStartTime: p.voting_start_time || p.votingStartTime,
-                votingEndTime: p.voting_end_time || p.votingEndTime,
-                yesVotes: p.final_tally_result?.yes || p.final_tally_result?.yes_count || p.yesVotes || '0',
-                noVotes: p.final_tally_result?.no || p.final_tally_result?.no_count || p.noVotes || '0',
-                abstainVotes: p.final_tally_result?.abstain || p.final_tally_result?.abstain_count || p.abstainVotes || '0',
-                vetoVotes: p.final_tally_result?.no_with_veto || p.final_tally_result?.no_with_veto_count || p.vetoVotes || '0',
-              }));
-              
-              transformedData.sort((a: any, b: any) => {
-                const idA = parseInt(a.id) || 0;
-                const idB = parseInt(b.id) || 0;
-                return idB - idA;
-              });
-              
-              setProposals(transformedData);
-              setLoading(false);
-              try {
-                sessionStorage.setItem(cacheKey, JSON.stringify({ data: transformedData, timestamp: Date.now() }));
-              } catch (e) {}
-              return;
-            }
+        console.log(`[Proposals] Fetching from backend: ${backendUrl}`);
+        
+        const res = await fetch(backendUrl, {
+          signal: AbortSignal.timeout(15000), // 15 second timeout
+        });
+        
+        if (!res.ok) {
+          // Check for 404 (chain not found) or 501 (governance not implemented)
+          if (res.status === 404) {
+            console.warn('[Proposals] Chain not found in backend');
+            setError('chain_not_found');
+            setLoading(false);
+            return;
           }
-        } catch (backendError) {
-          console.warn('[Proposals] Backend API failed, falling back to LCD:', backendError);
+          if (res.status === 501) {
+            console.warn('[Proposals] Governance not implemented');
+            setError('governance_not_available');
+            setLoading(false);
+            return;
+          }
+          throw new Error(`Backend API returned ${res.status}`);
         }
         
-        // Strategy 2: Fallback to direct LCD fetch
-        const lcdEndpoints = selectedChain.api?.map(api => ({
-          address: api.address,
-          provider: api.provider || 'Unknown'
-        })) || [];
+        const data = await res.json();
         
-        if (lcdEndpoints.length > 0) {
-          console.log(`[Proposals] Using direct LCD fetch for ${selectedChain.chain_name}`);
-          
-          try {
-            // Fetch multiple statuses in parallel
-            const [voting, passed, rejected] = await Promise.allSettled([
-              fetchProposalsDirectly(lcdEndpoints, 'PROPOSAL_STATUS_VOTING_PERIOD', 50),
-              fetchProposalsDirectly(lcdEndpoints, 'PROPOSAL_STATUS_PASSED', 50),
-              fetchProposalsDirectly(lcdEndpoints, 'PROPOSAL_STATUS_REJECTED', 50),
-            ]);
-            
-            const allProposals = [
-              ...(voting.status === 'fulfilled' ? voting.value : []),
-              ...(passed.status === 'fulfilled' ? passed.value : []),
-              ...(rejected.status === 'fulfilled' ? rejected.value : []),
-            ];
-            
-            if (allProposals.length > 0) {
-              const transformedData = allProposals.map((p: any) => ({
-                id: p.proposal_id || p.id,
-                title: p.content?.title || p.title || `Proposal #${p.proposal_id || p.id}`,
-                status: p.status,
-                type: p.content?.['@type'] || p.messages?.[0]?.['@type'] || p.type || 'Unknown',
-                submitTime: p.submit_time || p.submitTime,
-                votingStartTime: p.voting_start_time || p.votingStartTime,
-                votingEndTime: p.voting_end_time || p.votingEndTime,
-                yesVotes: p.final_tally_result?.yes || p.final_tally_result?.yes_count || p.yesVotes || '0',
-                noVotes: p.final_tally_result?.no || p.final_tally_result?.no_count || p.noVotes || '0',
-                abstainVotes: p.final_tally_result?.abstain || p.final_tally_result?.abstain_count || p.abstainVotes || '0',
-                vetoVotes: p.final_tally_result?.no_with_veto || p.final_tally_result?.no_with_veto_count || p.vetoVotes || '0',
-              }));
-              
-              transformedData.sort((a: any, b: any) => {
-                const idA = parseInt(a.id) || 0;
-                const idB = parseInt(b.id) || 0;
-                return idB - idA;
-              });
-              
-              setProposals(transformedData);
-              setLoading(false);
-              try {
-                sessionStorage.setItem(cacheKey, JSON.stringify({ data: transformedData, timestamp: Date.now() }));
-              } catch (e) {}
-              return;
-            }
-          } catch (directError) {
-            console.warn('[Proposals] Direct LCD fetch failed:', directError);
-            // Check if it's a "Not Implemented" error
-            if (directError && typeof directError === 'object' && 'message' in directError) {
-              const errorMsg = (directError as Error).message;
-              if (errorMsg.includes('501') || errorMsg.includes('Not Implemented') || errorMsg.includes('12')) {
-                setError('governance_not_available');
-                setLoading(false);
-                return;
-              }
-            }
-          }
+        if (!Array.isArray(data)) {
+          console.warn('[Proposals] Invalid response format:', data);
+          setProposals([]);
+          setLoading(false);
+          return;
         }
         
-        // No data found
-        setProposals([]);
+        // Transform and sort proposals
+        const transformedData = data.map((p: any) => ({
+          id: p.proposal_id || p.id,
+          title: p.content?.title || p.title || `Proposal #${p.proposal_id || p.id}`,
+          status: p.status,
+          type: p.content?.['@type'] || p.messages?.[0]?.['@type'] || p.type || 'Unknown',
+          submitTime: p.submit_time || p.submitTime,
+          votingStartTime: p.voting_start_time || p.votingStartTime,
+          votingEndTime: p.voting_end_time || p.votingEndTime,
+          yesVotes: p.final_tally_result?.yes || p.final_tally_result?.yes_count || p.yesVotes || '0',
+          noVotes: p.final_tally_result?.no || p.final_tally_result?.no_count || p.noVotes || '0',
+          abstainVotes: p.final_tally_result?.abstain || p.final_tally_result?.abstain_count || p.abstainVotes || '0',
+          vetoVotes: p.final_tally_result?.no_with_veto || p.final_tally_result?.no_with_veto_count || p.vetoVotes || '0',
+        }));
+        
+        transformedData.sort((a: any, b: any) => {
+          const idA = parseInt(a.id) || 0;
+          const idB = parseInt(b.id) || 0;
+          return idB - idA;
+        });
+        
+        console.log(`[Proposals] Successfully fetched ${transformedData.length} proposals`);
+        
+        setProposals(transformedData);
         setLoading(false);
+        
+        // Cache the results
+        try {
+          sessionStorage.setItem(cacheKey, JSON.stringify({ data: transformedData, timestamp: Date.now() }));
+        } catch (e) {
+          console.warn('[Proposals] Failed to cache:', e);
+        }
         
       } catch (err) {
         console.error('[Proposals] Failed to fetch:', err);
-        setLoading(false);
         setError('fetch_failed');
+        setLoading(false);
       }
     };
     
