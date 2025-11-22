@@ -17,6 +17,10 @@
     {
       "address": "https://api.axone.nodestake.org",
       "provider": "NodeStake"
+    },
+    {
+      "address": "https://api-axone-mainnet.maouam.xyz",
+      "provider": "MaouamNodelab"
     }
   ],
   "rpc": [
@@ -35,6 +39,10 @@
     {
       "address": "https://rpc.axone.nodestake.org",
       "provider": "NodeStake"
+    },
+    {
+      "address": "https://rpc-axone-mainnet.maouam.xyz",
+      "provider": "MaouamNodelab"
     }
   ],
   "sdk_version": "0.50.13",
