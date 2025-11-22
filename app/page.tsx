@@ -841,6 +841,30 @@ export default function Home() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Contributor 7 - MaouamNodelab */}
+                  <div className="relative group">
+                    <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-xl blur-lg group-hover:blur-xl transition-all opacity-0 group-hover:opacity-100"></div>
+                    <div className="relative bg-gray-800/80 border-2 border-gray-700/70 rounded-xl p-3 backdrop-blur-sm hover:border-yellow-500/50 transition-all">
+                      <img 
+                        src="https://raw.githubusercontent.com/maouamnodelab/logos/refs/heads/main/maouamnodelab-logo.jpg"
+                        alt="Maouam"
+                        className="w-12 h-12 rounded-full mb-2 mx-auto group-hover:scale-110 transition-transform ring-2 ring-yellow-500/10 object-cover"
+                      />
+                      <h3 className="text-white font-semibold text-center mb-2 text-xs">Maouam Nodelab</h3>
+                      <div className="flex justify-center gap-2">
+                        <a href="https://t.me/maouam" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-yellow-400 transition-colors">
+                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295-.002 0-.003 0-.005 0l.213-3.054 5.56-5.022c.24-.213-.054-.334-.373-.121l-6.869 4.326-2.96-.924c-.64-.203-.658-.64.135-.954l11.566-4.458c.538-.196 1.006.128.832.941z"/></svg>
+                        </a>
+                        <a href="https://x.com/maouamnodelab" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-yellow-400 transition-colors">
+                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                        </a>
+                        <a href="#" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-yellow-400 transition-colors">
+                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 
                 {/* Contribution CTA */}
