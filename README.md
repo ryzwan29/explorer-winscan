@@ -33,6 +33,8 @@
 - 🎨 **Modern UI** - Clean, elegant design with dark theme
 - 📱 **Responsive** - Works perfectly on desktop, tablet, and mobile
 - ⚡ **Fast & Optimized** - Built with performance in mind
+- 🗂️ **Smart Navigation** - Grouped sidebar menu with expandable categories
+- 🔄 **IBC Support** - Complete Inter-Blockchain Communication monitoring
 - 💼 **Keplr Wallet Integration**
   - 🔄 **Staking Operations** - Delegate, redelegate, and unbond tokens directly from the explorer
   - 💸 **Withdraw Rewards** - Claim staking rewards and validator commissions
@@ -237,6 +239,12 @@ This repository is configured with branch protection rules:
 - **Network** - Network information, RPC/API endpoints, and peers
 - **Uptime** - Validator uptime tracking with historical data
 - **Parameters** - Chain parameters (staking, slashing, governance, distribution)
+- **IBC Relayers** - Inter-blockchain communication connections
+  - 🌐 Connected chains overview with logos from Cosmos Chain Registry
+  - 📊 Channel statistics (total, open channels)
+  - 📦 Packet statistics (sent/received)
+  - 🔗 Detailed channel view with connection mapping
+  - 🔄 Auto-refresh every 10 minutes for smooth updates
 
 ### 💼 Wallet Operations
 - **Staking** - Delegate, redelegate, undelegate with custom amounts or percentages
@@ -381,6 +389,11 @@ Interested in partnering with WinScan? Contact us:
 - [x] Integrated stake management modal
 - [x] Multi-language support (7 languages)
 - [x] Responsive design for all devices
+- [x] IBC Relayers page with chain logos
+- [x] Chain Registry integration for logos
+- [x] Relayer detail page with channel information
+- [x] Packet statistics (sent/received)
+- [x] Grouped sidebar navigation with submenu
 
 ### In Progress 🚧
 - [ ] WebSocket support for real-time updates
@@ -389,8 +402,6 @@ Interested in partnering with WinScan? Contact us:
 - [ ] Historical data visualization
 
 ### Planned 📋
-- [ ] IBC tracking and relayer monitoring
-- [ ] NFT explorer for CosmWasm chains
 - [ ] Token swap integration (Osmosis DEX)
 - [ ] Validator ranking and comparison tools
 - [ ] Mobile app (React Native)
@@ -439,9 +450,16 @@ New contributor? Look for:
 
 ### 🏆 Contributors
 
+Thank you to all our amazing contributors who have helped make WinScan better! 🎉
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- This section is automatically updated by all-contributors bot -->
 <a href="https://github.com/winsnip-official/winscan/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=winsnip-official/winscan" />
+  <img src="https://contrib.rocks/image?repo=winsnip-official/winscan" alt="Contributors" />
 </a>
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+**Want to see your name here?** Check out our [Contributing Guide](CONTRIBUTING.md) to get started!
 
 Made with ❤️ by our amazing contributors!
 
