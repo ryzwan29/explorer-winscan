@@ -17,7 +17,10 @@ import {
   X,
   Globe,
   RefreshCw,
-  Shield
+  Shield,
+  Network,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { ChainData } from '@/types/chain';
@@ -31,10 +34,12 @@ interface MenuItem {
   translationKey: string;
   path: string;
   icon: React.ReactNode;
+  subItems?: MenuItem[];
 }
 export default function Sidebar({ selectedChain }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [expandedMenus, setExpandedMenus] = useState<Set<string>>(new Set());
   const pathname = usePathname();
   const router = useRouter();
   const { language } = useLanguage();
@@ -50,15 +55,40 @@ export default function Sidebar({ selectedChain }: SidebarProps) {
     { name: 'Overview', translationKey: 'menu.overview', path: chainPath || '/', icon: <Home className="w-5 h-5" /> },
     { name: 'Blocks', translationKey: 'menu.blocks', path: `${chainPath}/blocks`, icon: <Box className="w-5 h-5" /> },
     { name: 'Transactions', translationKey: 'menu.transactions', path: `${chainPath}/transactions`, icon: <FileText className="w-5 h-5" /> },
-    { name: 'Validators', translationKey: 'menu.validators', path: `${chainPath}/validators`, icon: <Users className="w-5 h-5" /> },
-    { name: 'Uptime', translationKey: 'menu.uptime', path: `${chainPath}/uptime`, icon: <Activity className="w-5 h-5" /> },
+    { 
+      name: 'Validators', 
+      translationKey: 'menu.validators', 
+      path: `${chainPath}/validators`, 
+      icon: <Users className="w-5 h-5" />,
+      subItems: [
+        { name: 'Validators', translationKey: 'menu.validators', path: `${chainPath}/validators`, icon: <Users className="w-4 h-4" /> },
+        { name: 'Uptime', translationKey: 'menu.uptime', path: `${chainPath}/uptime`, icon: <Activity className="w-4 h-4" /> },
+      ]
+    },
     { name: 'Proposals', translationKey: 'menu.proposals', path: `${chainPath}/proposals`, icon: <Vote className="w-5 h-5" /> },
     { name: 'Assets', translationKey: 'menu.assets', path: `${chainPath}/assets`, icon: <Coins className="w-5 h-5" /> },
     { name: 'Accounts', translationKey: 'menu.accounts', path: `${chainPath}/accounts`, icon: <Wallet className="w-5 h-5" /> },
-    { name: 'Network', translationKey: 'menu.network', path: `${chainPath}/network`, icon: <Globe className="w-5 h-5" /> },
-    { name: 'Consensus', translationKey: 'menu.consensus', path: `${chainPath}/consensus`, icon: <Shield className="w-5 h-5" /> },
-    { name: 'State Sync', translationKey: 'menu.statesync', path: `${chainPath}/statesync`, icon: <RefreshCw className="w-5 h-5" /> },
-    { name: 'Parameters', translationKey: 'menu.parameters', path: `${chainPath}/parameters`, icon: <Settings className="w-5 h-5" /> },
+    { 
+      name: 'Network', 
+      translationKey: 'menu.network', 
+      path: `${chainPath}/network`, 
+      icon: <Globe className="w-5 h-5" />,
+      subItems: [
+        { name: 'Network', translationKey: 'menu.network', path: `${chainPath}/network`, icon: <Globe className="w-4 h-4" /> },
+        { name: 'Relayers', translationKey: 'menu.relayers', path: `${chainPath}/relayers`, icon: <Network className="w-4 h-4" /> },
+        { name: 'Consensus', translationKey: 'menu.consensus', path: `${chainPath}/consensus`, icon: <Shield className="w-4 h-4" /> },
+      ]
+    },
+    { 
+      name: 'Tools', 
+      translationKey: 'menu.tools', 
+      path: `${chainPath}/statesync`, 
+      icon: <Settings className="w-5 h-5" />,
+      subItems: [
+        { name: 'State Sync', translationKey: 'menu.statesync', path: `${chainPath}/statesync`, icon: <RefreshCw className="w-4 h-4" /> },
+        { name: 'Parameters', translationKey: 'menu.parameters', path: `${chainPath}/parameters`, icon: <Settings className="w-4 h-4" /> },
+      ]
+    },
   ], [chainPath]);
   useEffect(() => {
     menuItems.forEach(item => {
@@ -75,6 +105,28 @@ export default function Sidebar({ selectedChain }: SidebarProps) {
   const closeMobile = useCallback(() => {
     setMobileOpen(false);
   }, []);
+  
+  const toggleMenu = useCallback((menuName: string) => {
+    setExpandedMenus(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(menuName)) {
+        newSet.delete(menuName);
+      } else {
+        newSet.add(menuName);
+      }
+      return newSet;
+    });
+  }, []);
+  
+  const isMenuExpanded = useCallback((menuName: string) => {
+    return expandedMenus.has(menuName);
+  }, [expandedMenus]);
+  
+  const isSubmenuActive = useCallback((item: MenuItem) => {
+    if (!item.subItems) return false;
+    return item.subItems.some(sub => pathname === sub.path || pathname.startsWith(sub.path + '/'));
+  }, [pathname]);
+
   useEffect(() => {
     const savedState = localStorage.getItem('sidebar-collapsed');
     if (savedState === 'true') {
@@ -140,28 +192,88 @@ export default function Sidebar({ selectedChain }: SidebarProps) {
         </div>
         <nav className="py-4 overflow-y-auto flex-1 overscroll-contain">
           {menuItems.map((item) => {
-            const isActive = pathname === item.path;
+            const hasSubItems = item.subItems && item.subItems.length > 0;
+            const isExpanded = isMenuExpanded(item.name);
+            const isActive = pathname === item.path || (hasSubItems && isSubmenuActive(item));
             const displayName = t(item.translationKey);
+            
             return (
-              <Link
-                key={item.path}
-                href={item.path}
-                prefetch={true}
-                onClick={closeMobile}
-                className={`flex items-center px-4 py-3 transition-all duration-200 touch-manipulation select-none ${
-                  isActive
-                    ? 'bg-blue-500/10 text-blue-500 border-r-4 border-blue-500'
-                    : 'text-gray-400 hover:bg-gray-800/50 hover:text-white active:bg-gray-700'
-                } ${collapsed ? 'justify-center' : 'space-x-3'} 
-                ${!collapsed && !isActive ? 'hover:translate-x-1' : ''}`}
-                title={collapsed ? displayName : ''}
-              >
-                <span className={`transition-transform ${isActive ? 'scale-110' : ''}`}>{item.icon}</span>
-                {!collapsed && <span className="font-medium whitespace-nowrap">{displayName}</span>}
-                {!collapsed && isActive && (
-                  <div className="ml-auto w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+              <div key={item.path}>
+                {hasSubItems ? (
+                  <>
+                    <button
+                      onClick={() => toggleMenu(item.name)}
+                      className={`w-full flex items-center px-4 py-3 transition-all duration-200 touch-manipulation select-none ${
+                        isActive
+                          ? 'bg-blue-500/10 text-blue-500 border-r-4 border-blue-500'
+                          : 'text-gray-400 hover:bg-gray-800/50 hover:text-white active:bg-gray-700'
+                      } ${collapsed ? 'justify-center' : 'space-x-3'}`}
+                      title={collapsed ? displayName : ''}
+                    >
+                      <span className={`transition-transform ${isActive ? 'scale-110' : ''}`}>{item.icon}</span>
+                      {!collapsed && (
+                        <>
+                          <span className="font-medium whitespace-nowrap flex-1 text-left">{displayName}</span>
+                          {isExpanded ? (
+                            <ChevronUp className="w-4 h-4" />
+                          ) : (
+                            <ChevronDown className="w-4 h-4" />
+                          )}
+                        </>
+                      )}
+                    </button>
+                    
+                    {!collapsed && isExpanded && (
+                      <div className="bg-[#0a0a0a]">
+                        {item.subItems.map((subItem) => {
+                          const isSubActive = pathname === subItem.path || pathname.startsWith(subItem.path + '/');
+                          const subDisplayName = t(subItem.translationKey);
+                          return (
+                            <Link
+                              key={subItem.path}
+                              href={subItem.path}
+                              prefetch={true}
+                              onClick={closeMobile}
+                              className={`flex items-center pl-12 pr-4 py-2.5 transition-all duration-200 touch-manipulation select-none ${
+                                isSubActive
+                                  ? 'bg-blue-500/10 text-blue-500'
+                                  : 'text-gray-400 hover:bg-gray-800/50 hover:text-white active:bg-gray-700'
+                              } hover:translate-x-1`}
+                            >
+                              <span className={`transition-transform mr-3 ${isSubActive ? 'scale-110' : ''}`}>
+                                {subItem.icon}
+                              </span>
+                              <span className="font-medium text-sm whitespace-nowrap">{subDisplayName}</span>
+                              {isSubActive && (
+                                <div className="ml-auto w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
+                              )}
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <Link
+                    href={item.path}
+                    prefetch={true}
+                    onClick={closeMobile}
+                    className={`flex items-center px-4 py-3 transition-all duration-200 touch-manipulation select-none ${
+                      isActive
+                        ? 'bg-blue-500/10 text-blue-500 border-r-4 border-blue-500'
+                        : 'text-gray-400 hover:bg-gray-800/50 hover:text-white active:bg-gray-700'
+                    } ${collapsed ? 'justify-center' : 'space-x-3'} 
+                    ${!collapsed && !isActive ? 'hover:translate-x-1' : ''}`}
+                    title={collapsed ? displayName : ''}
+                  >
+                    <span className={`transition-transform ${isActive ? 'scale-110' : ''}`}>{item.icon}</span>
+                    {!collapsed && <span className="font-medium whitespace-nowrap">{displayName}</span>}
+                    {!collapsed && isActive && (
+                      <div className="ml-auto w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                    )}
+                  </Link>
                 )}
-              </Link>
+              </div>
             );
           })}
         </nav>
