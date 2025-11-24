@@ -7,12 +7,76 @@ import {
 
 // Helper to get gov module type URL based on chain
 function getGovMsgVoteTypeUrl(chainId: string): string {
-  // AtomOne uses custom gov module with v1beta1
-  if (chainId.includes('atomone')) {
-    return '/atomone.gov.v1beta1.MsgVote';
-  }
-  // Default to cosmos standard
+  // All chains use standard cosmos gov v1beta1 for client-side signing
+  // Backend API will handle the routing to correct module (atomone/cosmos)
   return '/cosmos.gov.v1beta1.MsgVote';
+}
+
+// Try multiple vote methods with fallback
+async function tryVoteWithFallback(
+  client: any,
+  voterAddress: string,
+  proposalId: string,
+  option: number,
+  fee: any,
+  memo: string,
+  chainId: string
+) {
+  const voteMethods = [
+    {
+      name: 'cosmos.gov.v1beta1',
+      typeUrl: '/cosmos.gov.v1beta1.MsgVote',
+    },
+    {
+      name: 'cosmos.gov.v1',
+      typeUrl: '/cosmos.gov.v1.MsgVote',
+    },
+  ];
+
+  // Add atomone specific if needed
+  if (chainId.includes('atomone')) {
+    voteMethods.unshift({
+      name: 'atomone.gov.v1beta1',
+      typeUrl: '/atomone.gov.v1beta1.MsgVote',
+    });
+  }
+
+  let lastError;
+  for (const method of voteMethods) {
+    try {
+      console.log(`Trying vote with ${method.name}...`);
+      
+      const voteMsg = {
+        typeUrl: method.typeUrl,
+        value: {
+          proposalId: proposalId,
+          voter: voterAddress,
+          option: option,
+        },
+      };
+
+      const result = await client.signAndBroadcast(
+        voterAddress,
+        [voteMsg],
+        fee,
+        memo
+      );
+
+      if (result.code === 0) {
+        console.log(`✅ Vote successful with ${method.name}`);
+        return { success: true, txHash: result.transactionHash, method: method.name };
+      } else {
+        console.log(`Failed with ${method.name}: ${result.rawLog}`);
+        lastError = result.rawLog;
+      }
+    } catch (err: any) {
+      console.log(`Error with ${method.name}: ${err.message}`);
+      lastError = err.message;
+      continue;
+    }
+  }
+
+  return { success: false, error: lastError || 'All vote methods failed' };
 }
 
 function calculateFee(chain: ChainData, gasLimit: string): { amount: Array<{ denom: string; amount: string }>; gas: string } {
@@ -99,6 +163,45 @@ async function createEvmRegistry() {
     return registry;
   } catch (error) {
     console.error('Error creating EVM registry:', error);
+    return null;
+  }
+}
+
+// Create registry with custom gov module support (for AtomOne, etc)
+async function createCustomGovRegistry(chainId: string) {
+  try {
+    const { Registry } = await import('@cosmjs/proto-signing');
+    const { defaultRegistryTypes } = await import('@cosmjs/stargate');
+    
+    if (typeof Registry !== 'function') {
+      console.warn('Registry is not a constructor, using default registry');
+      return null;
+    }
+    
+    const registry = new Registry(defaultRegistryTypes);
+    
+    // For AtomOne: map cosmos.gov types to atomone.gov
+    if (chainId.includes('atomone')) {
+      console.log('Creating AtomOne-compatible registry...');
+      
+      // Get the MsgVote type from default registry
+      const msgVoteType = (registry as any).lookupType?.('/cosmos.gov.v1beta1.MsgVote');
+      
+      if (msgVoteType) {
+        // Register AtomOne gov types using same structure as Cosmos
+        try {
+          registry.register('/atomone.gov.v1beta1.MsgVote', msgVoteType);
+          console.log('✅ Registered /atomone.gov.v1beta1.MsgVote');
+        } catch (err) {
+          console.warn('Could not register AtomOne types, will use cosmos types');
+        }
+      }
+    }
+    
+    console.log('✅ Created custom gov registry');
+    return registry;
+  } catch (error) {
+    console.error('Error creating custom gov registry:', error);
     return null;
   }
 }
@@ -1493,27 +1596,22 @@ export async function executeVote(
         clientOptions.accountParser = accountParser;
         console.log('✅ Using custom EVM account parser');
       }
+    } else {
+      // Use custom gov registry for chains with different gov modules
+      const govRegistry = await createCustomGovRegistry(chainId);
+      if (govRegistry) {
+        clientOptions.registry = govRegistry;
+        console.log('✅ Using custom gov registry');
+      }
     }
     
     const client = await SigningStargateClient.connectWithSigner(
       rpcEndpoint,
       actualOfflineSigner,
       clientOptions
-    );    console.log('Creating MsgVote transaction...');
+    );
 
-    const voteTypeUrl = getGovMsgVoteTypeUrl(chainId);
-    console.log(`Using gov module: ${voteTypeUrl}`);
-
-    const voteMsg = {
-      typeUrl: voteTypeUrl,
-      value: {
-        proposalId: params.proposalId,
-        voter: params.voterAddress,
-        option: params.option,
-      },
-    };
-
-    console.log('Vote message:', voteMsg);
+    console.log('Voting on proposal...');
 
     const fee = calculateFee(chain, gasLimit);
 
@@ -1528,6 +1626,16 @@ export async function executeVote(
         if (!restEndpoint) {
           throw new Error('No REST endpoint available');
         }
+
+        const voteTypeUrl = getGovMsgVoteTypeUrl(chainId);
+        const voteMsg = {
+          typeUrl: voteTypeUrl,
+          value: {
+            proposalId: params.proposalId,
+            voter: params.voterAddress,
+            option: params.option,
+          },
+        };
         
         const signedTx = await signTransactionForEvm(
           actualOfflineSigner,
@@ -1552,22 +1660,24 @@ export async function executeVote(
       }
     }
 
-    const result = await client.signAndBroadcast(
+    // Try multiple vote methods with fallback
+    const result = await tryVoteWithFallback(
+      client,
       params.voterAddress,
-      [voteMsg],
+      params.proposalId,
+      params.option,
       fee,
-      memo
+      memo,
+      chainId
     );
 
-    console.log('Transaction result:', result);
-
-    if (result.code === 0) {
+    if (result.success) {
       console.log('✅ Vote successful!');
-      console.log('Transaction hash:', result.transactionHash);
-      return { success: true, txHash: result.transactionHash };
+      console.log('Transaction hash:', result.txHash);
+      return { success: true, txHash: result.txHash };
     } else {
-      console.error('❌ Vote failed:', result.rawLog);
-      return { success: false, error: result.rawLog };
+      console.error('❌ Vote failed:', result.error);
+      return { success: false, error: result.error };
     }
   } catch (error: any) {
     console.error('Vote error:', error);
