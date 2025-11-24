@@ -7,9 +7,9 @@ import {
 
 // Helper to get gov module type URL based on chain
 function getGovMsgVoteTypeUrl(chainId: string): string {
-  // AtomOne uses custom gov module
+  // AtomOne uses custom gov module with v1beta1
   if (chainId.includes('atomone')) {
-    return '/atomone.gov.v1.MsgVote';
+    return '/atomone.gov.v1beta1.MsgVote';
   }
   // Default to cosmos standard
   return '/cosmos.gov.v1beta1.MsgVote';
