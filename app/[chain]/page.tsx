@@ -7,7 +7,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { ChainData } from '@/types/chain';
 import ValidatorAvatar from '@/components/ValidatorAvatar';
-import { Activity, Box, Users, TrendingUp, Globe, Twitter, MessageCircle, Github } from 'lucide-react';
+import { Activity, Box, Users, TrendingUp, Globe, Twitter, MessageCircle, Github, Send } from 'lucide-react';
 import TokenomicsChart from '@/components/TokenomicsChart';
 import TransactionHistoryChart from '@/components/TransactionHistoryChart';
 import VotingPowerChart from '@/components/VotingPowerChart';
@@ -91,12 +91,13 @@ export default function ChainOverviewPage() {
     const fetchChainRegistry = async () => {
       try {
         // First check if chain.json already has social links (prioritize local data)
-        if (selectedChain.website || selectedChain.description || selectedChain.github || selectedChain.twitter) {
+        if (selectedChain.website || selectedChain.description || selectedChain.github || selectedChain.twitter || selectedChain.telegram) {
           console.log('Using local chain.json social links');
           setChainRegistry({
             website: selectedChain.website,
             description: selectedChain.description,
             twitter: selectedChain.twitter,
+            telegram: selectedChain.telegram,
             codebase: selectedChain.github ? { git_repo: selectedChain.github } : undefined
           });
           return;
@@ -494,15 +495,16 @@ export default function ChainOverviewPage() {
             {chainRegistry && (chainRegistry.website || chainRegistry.description || chainRegistry.codebase?.git_repo || chainRegistry.twitter) ? (
               <div className="relative overflow-hidden bg-[#1a1a1a] border border-gray-800 rounded-xl shadow-lg">
                 <div className="relative p-4 md:p-6">
-                  {/* Top Section: Logo, Name & Live Status */}
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-                    <div className="flex items-center gap-4">
+                  {/* Top Section: Logo, Name & Social Links - Centered */}
+                  <div className="flex flex-col items-center gap-4 mb-4">
+                    {/* Logo and Name - Centered */}
+                    <div className="flex flex-col items-center text-center gap-3">
                       {selectedChain && (
                         <div className="relative group">
                           <img 
                             src={selectedChain.logo} 
                             alt={selectedChain.chain_name} 
-                            className="relative w-16 h-16 md:w-20 md:h-20 rounded-full border-2 border-gray-800 shadow-lg"
+                            className="relative w-20 h-20 md:w-24 md:h-24 rounded-full border-2 border-gray-800 shadow-lg"
                           />
                         </div>
                       )}
@@ -514,66 +516,78 @@ export default function ChainOverviewPage() {
                       </div>
                     </div>
                     
-                    {/* Live indicator */}
-                    <div className="flex items-center gap-2 px-3 py-1.5 bg-[#0a0a0a] border border-gray-800 rounded-full">
-                      <div className={`w-2 h-2 rounded-full ${isRefreshing ? 'bg-blue-500 animate-pulse' : 'bg-green-500'}`}></div>
-                      <span className="text-xs text-gray-300 font-medium">
-                        {isRefreshing ? t('overview.updating') : t('overview.live')}
-                      </span>
+                    {/* Social Links - Centered */}
+                    <div className="flex flex-wrap items-center justify-center gap-2">
+                      {chainRegistry.website && (
+                        <a
+                          href={chainRegistry.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="group inline-flex items-center gap-2 px-4 h-9 bg-[#0f0f0f] hover:bg-gray-800 border border-gray-800 hover:border-gray-700 rounded-lg transition-all duration-200 text-xs font-medium"
+                        >
+                          <Globe className="w-3.5 h-3.5 text-gray-400 group-hover:text-white transition-colors flex-shrink-0" />
+                          <span className="text-gray-300 group-hover:text-white transition-colors whitespace-nowrap">Website</span>
+                        </a>
+                      )}
+                      
+                      {chainRegistry.codebase?.git_repo && (
+                        <a
+                          href={chainRegistry.codebase.git_repo}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="group inline-flex items-center gap-2 px-4 h-9 bg-[#0f0f0f] hover:bg-gray-800 border border-gray-800 hover:border-gray-700 rounded-lg transition-all duration-200 text-xs font-medium"
+                        >
+                          <Github className="w-3.5 h-3.5 text-gray-400 group-hover:text-white transition-colors flex-shrink-0" />
+                          <span className="text-gray-300 group-hover:text-white transition-colors whitespace-nowrap">GitHub</span>
+                        </a>
+                      )}
+                      
+                      {chainRegistry.twitter && (
+                        <a
+                          href={chainRegistry.twitter}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="group inline-flex items-center gap-2 px-4 h-9 bg-[#0f0f0f] hover:bg-gray-800 border border-gray-800 hover:border-gray-700 rounded-lg transition-all duration-200 text-xs font-medium"
+                        >
+                          <svg 
+                            className="w-3.5 h-3.5 text-gray-400 group-hover:text-white transition-colors flex-shrink-0" 
+                            fill="currentColor" 
+                            viewBox="0 0 24 24"
+                          >
+                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                          </svg>
+                          <span className="text-gray-300 group-hover:text-white transition-colors whitespace-nowrap">X (Twitter)</span>
+                        </a>
+                      )}
+                      
+                      {chainRegistry.telegram && (
+                        <a
+                          href={chainRegistry.telegram}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="group inline-flex items-center gap-2 px-4 h-9 bg-[#0f0f0f] hover:bg-gray-800 border border-gray-800 hover:border-gray-700 rounded-lg transition-all duration-200 text-xs font-medium"
+                        >
+                          <Send className="w-3.5 h-3.5 text-gray-400 group-hover:text-white transition-colors flex-shrink-0" />
+                          <span className="text-gray-300 group-hover:text-white transition-colors whitespace-nowrap">Telegram</span>
+                        </a>
+                      )}
+                      
+                      {/* Live indicator - inline with social links */}
+                      <div className="inline-flex items-center gap-2 px-3 h-9 bg-[#0a0a0a] border border-gray-800 rounded-full">
+                        <div className={`w-2 h-2 rounded-full flex-shrink-0 ${isRefreshing ? 'bg-blue-500 animate-pulse' : 'bg-green-500'}`}></div>
+                        <span className="text-xs text-gray-300 font-medium whitespace-nowrap">
+                          {isRefreshing ? t('overview.updating') : t('overview.live')}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Description */}
+                  {/* Description - Centered */}
                   {chainRegistry.description && (
-                    <div className="mb-4 p-3 bg-[#0f0f0f] rounded-lg border border-gray-800">
+                    <div className="p-3 bg-[#0f0f0f] rounded-lg border border-gray-800 text-center">
                       <p className="text-gray-300 text-xs md:text-sm leading-relaxed">{chainRegistry.description}</p>
                     </div>
                   )}
-                  
-                  {/* Social Links */}
-                  <div className="flex flex-wrap items-center gap-2">
-                    {chainRegistry.website && (
-                      <a
-                        href={chainRegistry.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="group flex items-center gap-2 px-4 py-2 bg-[#0f0f0f] hover:bg-gray-800 border border-gray-800 hover:border-gray-700 rounded-lg transition-all duration-200 text-xs font-medium"
-                      >
-                        <Globe className="w-3.5 h-3.5 text-gray-400 group-hover:text-white transition-colors" />
-                        <span className="text-gray-300 group-hover:text-white transition-colors">Website</span>
-                      </a>
-                    )}
-                    
-                    {chainRegistry.codebase?.git_repo && (
-                      <a
-                        href={chainRegistry.codebase.git_repo}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="group flex items-center gap-2 px-4 py-2 bg-[#0f0f0f] hover:bg-gray-800 border border-gray-800 hover:border-gray-700 rounded-lg transition-all duration-200 text-xs font-medium"
-                      >
-                        <Github className="w-3.5 h-3.5 text-gray-400 group-hover:text-white transition-colors" />
-                        <span className="text-gray-300 group-hover:text-white transition-colors">GitHub</span>
-                      </a>
-                    )}
-                    
-                    {chainRegistry.twitter && (
-                      <a
-                        href={chainRegistry.twitter}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="group flex items-center gap-2 px-4 py-2 bg-[#0f0f0f] hover:bg-gray-800 border border-gray-800 hover:border-gray-700 rounded-lg transition-all duration-200 text-xs font-medium"
-                      >
-                        <svg 
-                          className="w-3.5 h-3.5 text-gray-400 group-hover:text-white transition-colors" 
-                          fill="currentColor" 
-                          viewBox="0 0 24 24"
-                        >
-                          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                        </svg>
-                        <span className="text-gray-300 group-hover:text-white transition-colors">X (Twitter)</span>
-                      </a>
-                    )}
-                  </div>
                 </div>
               </div>
             ) : (
