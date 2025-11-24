@@ -18,6 +18,8 @@ export interface ChainData {
   chain_id?: string; 
   api: ChainEndpoint[];
   rpc: ChainEndpoint[];
+  evm_rpc?: ChainEndpoint[];
+  evm_wss?: ChainEndpoint[];
   sdk_version: string;
   coin_type: string;
   min_tx_fee: string;

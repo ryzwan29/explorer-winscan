@@ -39,6 +39,15 @@ export async function GET(request: NextRequest) {
     });
 
     if (!response.ok) {
+      // If mint module not available (501 or 404), return default values
+      if (response.status === 501 || response.status === 404) {
+        console.log(`Chain ${chain} does not support mint module (${response.status})`);
+        return NextResponse.json({
+          inflation: '0',
+          annualProvisions: null,
+          note: 'Mint module not available for this chain'
+        });
+      }
       throw new Error(`LCD request failed: ${response.status}`);
     }
 

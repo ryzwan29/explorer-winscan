@@ -20,7 +20,8 @@ import {
   Shield,
   Network,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Zap
 } from 'lucide-react';
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { ChainData } from '@/types/chain';
@@ -51,45 +52,70 @@ export default function Sidebar({ selectedChain }: SidebarProps) {
     }
     return selectedChain ? `/${selectedChain.chain_name.toLowerCase().replace(/\s+/g, '-')}` : '';
   }, [pathname, selectedChain]);
-  const menuItems: MenuItem[] = useMemo(() => [
-    { name: 'Overview', translationKey: 'menu.overview', path: chainPath || '/', icon: <Home className="w-5 h-5" /> },
-    { name: 'Blocks', translationKey: 'menu.blocks', path: `${chainPath}/blocks`, icon: <Box className="w-5 h-5" /> },
-    { name: 'Transactions', translationKey: 'menu.transactions', path: `${chainPath}/transactions`, icon: <FileText className="w-5 h-5" /> },
-    { 
-      name: 'Validators', 
-      translationKey: 'menu.validators', 
-      path: `${chainPath}/validators`, 
-      icon: <Users className="w-5 h-5" />,
-      subItems: [
-        { name: 'Validators', translationKey: 'menu.validators', path: `${chainPath}/validators`, icon: <Users className="w-4 h-4" /> },
-        { name: 'Uptime', translationKey: 'menu.uptime', path: `${chainPath}/uptime`, icon: <Activity className="w-4 h-4" /> },
-        { name: 'Proposals', translationKey: 'menu.proposals', path: `${chainPath}/proposals`, icon: <Vote className="w-4 h-4" /> },
-      ]
-    },
-    { name: 'Assets', translationKey: 'menu.assets', path: `${chainPath}/assets`, icon: <Coins className="w-5 h-5" /> },
-    { name: 'Accounts', translationKey: 'menu.accounts', path: `${chainPath}/accounts`, icon: <Wallet className="w-5 h-5" /> },
-    { 
-      name: 'Network', 
-      translationKey: 'menu.network', 
-      path: `${chainPath}/network`, 
-      icon: <Globe className="w-5 h-5" />,
-      subItems: [
-        { name: 'Network', translationKey: 'menu.network', path: `${chainPath}/network`, icon: <Globe className="w-4 h-4" /> },
-        { name: 'Relayers', translationKey: 'menu.relayers', path: `${chainPath}/relayers`, icon: <Network className="w-4 h-4" /> },
-        { name: 'Consensus', translationKey: 'menu.consensus', path: `${chainPath}/consensus`, icon: <Shield className="w-4 h-4" /> },
-      ]
-    },
-    { 
-      name: 'Tools', 
-      translationKey: 'menu.tools', 
-      path: `${chainPath}/statesync`, 
-      icon: <Settings className="w-5 h-5" />,
-      subItems: [
-        { name: 'State Sync', translationKey: 'menu.statesync', path: `${chainPath}/statesync`, icon: <RefreshCw className="w-4 h-4" /> },
-        { name: 'Parameters', translationKey: 'menu.parameters', path: `${chainPath}/parameters`, icon: <Settings className="w-4 h-4" /> },
-      ]
-    },
-  ], [chainPath]);
+  const menuItems: MenuItem[] = useMemo(() => {
+    const hasEvmSupport = selectedChain?.evm_rpc && selectedChain?.evm_wss && 
+                          selectedChain.evm_rpc.length > 0 && selectedChain.evm_wss.length > 0;
+    
+    const items: MenuItem[] = [
+      { name: 'Overview', translationKey: 'menu.overview', path: chainPath || '/', icon: <Home className="w-5 h-5" /> },
+      { name: 'Blocks', translationKey: 'menu.blocks', path: `${chainPath}/blocks`, icon: <Box className="w-5 h-5" /> },
+      { name: 'Transactions', translationKey: 'menu.transactions', path: `${chainPath}/transactions`, icon: <FileText className="w-5 h-5" /> },
+      { 
+        name: 'Validators', 
+        translationKey: 'menu.validators', 
+        path: `${chainPath}/validators`, 
+        icon: <Users className="w-5 h-5" />,
+        subItems: [
+          { name: 'Validators', translationKey: 'menu.validators', path: `${chainPath}/validators`, icon: <Users className="w-4 h-4" /> },
+          { name: 'Uptime', translationKey: 'menu.uptime', path: `${chainPath}/uptime`, icon: <Activity className="w-4 h-4" /> },
+          { name: 'Proposals', translationKey: 'menu.proposals', path: `${chainPath}/proposals`, icon: <Vote className="w-4 h-4" /> },
+        ]
+      },
+      { name: 'Assets', translationKey: 'menu.assets', path: `${chainPath}/assets`, icon: <Coins className="w-5 h-5" /> },
+      { name: 'Accounts', translationKey: 'menu.accounts', path: `${chainPath}/accounts`, icon: <Wallet className="w-5 h-5" /> },
+    ];
+
+    // Add EVM menu if chain has EVM support
+    if (hasEvmSupport) {
+      items.push({
+        name: 'EVM Explorer',
+        translationKey: 'menu.evm',
+        path: `${chainPath}/evm`,
+        icon: <Zap className="w-5 h-5" />,
+        subItems: [
+          { name: 'EVM Blocks', translationKey: 'menu.evm.blocks', path: `${chainPath}/evm/blocks`, icon: <Box className="w-4 h-4" /> },
+          { name: 'EVM Transactions', translationKey: 'menu.evm.transactions', path: `${chainPath}/evm/transactions`, icon: <FileText className="w-4 h-4" /> },
+          { name: 'EVM Contracts', translationKey: 'menu.evm.contracts', path: `${chainPath}/evm/contracts`, icon: <FileText className="w-4 h-4" /> },
+        ]
+      });
+    }
+
+    items.push(
+      { 
+        name: 'Network', 
+        translationKey: 'menu.network', 
+        path: `${chainPath}/network`, 
+        icon: <Globe className="w-5 h-5" />,
+        subItems: [
+          { name: 'Network', translationKey: 'menu.network', path: `${chainPath}/network`, icon: <Globe className="w-4 h-4" /> },
+          { name: 'Relayers', translationKey: 'menu.relayers', path: `${chainPath}/relayers`, icon: <Network className="w-4 h-4" /> },
+          { name: 'Consensus', translationKey: 'menu.consensus', path: `${chainPath}/consensus`, icon: <Shield className="w-4 h-4" /> },
+        ]
+      },
+      { 
+        name: 'Tools', 
+        translationKey: 'menu.tools', 
+        path: `${chainPath}/statesync`, 
+        icon: <Settings className="w-5 h-5" />,
+        subItems: [
+          { name: 'State Sync', translationKey: 'menu.statesync', path: `${chainPath}/statesync`, icon: <RefreshCw className="w-4 h-4" /> },
+          { name: 'Parameters', translationKey: 'menu.parameters', path: `${chainPath}/parameters`, icon: <Settings className="w-4 h-4" /> },
+        ]
+      }
+    );
+
+    return items;
+  }, [chainPath, selectedChain]);
   useEffect(() => {
     menuItems.forEach(item => {
       router.prefetch(item.path);
