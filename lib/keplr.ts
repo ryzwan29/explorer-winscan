@@ -323,11 +323,34 @@ export function convertChainToKeplr(chain: ChainData, coinType?: 118 | 60): Kepl
 export function isKeplrInstalled(): boolean {
   return typeof window !== 'undefined' && !!window.keplr;
 }
+
+export function isLeapInstalled(): boolean {
+  return typeof window !== 'undefined' && !!(window as any).leap;
+}
+
+export function isCosmostationInstalled(): boolean {
+  return typeof window !== 'undefined' && !!(window as any).cosmostation;
+}
+
 export function getKeplr() {
   if (!isKeplrInstalled()) {
     throw new Error('Keplr extension is not installed. Please install it from https://www.keplr.app/');
   }
   return window.keplr!;
+}
+
+export function getLeap() {
+  if (!isLeapInstalled()) {
+    throw new Error('Leap extension is not installed. Please install it from https://www.leapwallet.io/');
+  }
+  return (window as any).leap;
+}
+
+export function getCosmostation() {
+  if (!isCosmostationInstalled()) {
+    throw new Error('Cosmostation extension is not installed. Please install it from https://cosmostation.io/');
+  }
+  return (window as any).cosmostation;
 }
 export async function suggestChain(chainInfo: KeplrChainInfo): Promise<void> {
   const keplr = getKeplr();
@@ -347,26 +370,33 @@ export async function suggestChain(chainInfo: KeplrChainInfo): Promise<void> {
     throw error;
   }
 }
+
 export async function connectKeplr(
   chain: ChainData, 
   coinType?: 118 | 60
 ): Promise<KeplrAccount> {
-  if (!isKeplrInstalled()) {
-    throw new Error('Keplr extension is not installed');
-  }
-  const keplr = getKeplr();
+  return connectWalletWithType(chain, coinType, 'keplr');
+}
+
+async function _connectWalletCore(
+  wallet: any,
+  chain: ChainData,
+  coinType?: 118 | 60,
+  walletType: 'keplr' | 'leap' | 'cosmostation' = 'keplr'
+): Promise<KeplrAccount> {
   const chainInfo = convertChainToKeplr(chain, coinType);
   let chainId = chainInfo.chainId;
   
   // Auto-detect coinType from chain config if not provided
   const finalCoinType = coinType ?? (chain.coin_type ? parseInt(chain.coin_type) as (118 | 60) : 118);
 
-  console.log('🔍 connectKeplr Debug:', {
+  console.log(`🔍 connect${walletType.charAt(0).toUpperCase() + walletType.slice(1)} Debug:`, {
     chain_name: chain.chain_name,
     chain_id: chain.chain_id,
     computed_chainId: chainId,
     configCoinType: chain.coin_type,
-    finalCoinType
+    finalCoinType,
+    walletType
   });
 
   const rpcEndpoint = chain.rpc?.[0]?.address;
@@ -393,7 +423,7 @@ export async function connectKeplr(
 
   try {
     try {
-      await keplr.enable(chainId);
+      await wallet.enable(chainId);
     } catch (enableError: any) {
       
       if (coinType === 60 && !chainInfo.features?.includes('eth-address-gen')) {
@@ -401,17 +431,38 @@ export async function connectKeplr(
         console.log('🔧 Added EVM features to chain suggestion');
       }
       
-      await suggestChain(chainInfo);
-      console.log('✅ Chain suggested successfully');
+      // Use wallet-specific method for suggesting chain
+      if (walletType === 'cosmostation') {
+        await wallet.cosmos.request({
+          method: 'cos_addChain',
+          params: chainInfo,
+        });
+      } else {
+        await wallet.experimentalSuggestChain(chainInfo);
+      }
+      console.log(`✅ Chain suggested successfully to ${walletType}`);
       
-      await keplr.enable(chainId);
+      await wallet.enable(chainId);
       console.log('✅ Chain enabled after suggestion:', chainId);
     }
     
     let key;
     try {
-      key = await keplr.getKey(chainId);
-      console.log('✅ Keplr key retrieved for address:', key.bech32Address);
+      if (walletType === 'cosmostation') {
+        const account = await wallet.cosmos.request({
+          method: 'cos_account',
+          params: { chainName: chainId },
+        });
+        key = {
+          bech32Address: account.address,
+          algo: 'secp256k1',
+          pubKey: new Uint8Array(Buffer.from(account.publicKey, 'hex')),
+          isNanoLedger: false,
+        };
+      } else {
+        key = await wallet.getKey(chainId);
+      }
+      console.log(`✅ ${walletType} key retrieved for address:`, key.bech32Address);
     } catch (keyError: any) {
       if (keyError.message?.includes('EthAccount') || keyError.message?.includes('Unsupported type')) {
         console.log('🔄 EthAccount type detected, reconnecting with EVM support...');
@@ -421,12 +472,32 @@ export async function connectKeplr(
           features: ['eth-address-gen', 'eth-key-sign', 'ibc-transfer'],
         };
         
-        await keplr.experimentalSuggestChain(evmChainInfo);
+        if (walletType === 'cosmostation') {
+          await wallet.cosmos.request({
+            method: 'cos_addChain',
+            params: evmChainInfo,
+          });
+        } else {
+          await wallet.experimentalSuggestChain(evmChainInfo);
+        }
         await new Promise(resolve => setTimeout(resolve, 500));
-        await keplr.enable(chainId);
+        await wallet.enable(chainId);
         
-        key = await keplr.getKey(chainId);
-        console.log('✅ Keplr key retrieved after EVM re-config:', key.bech32Address);
+        if (walletType === 'cosmostation') {
+          const account = await wallet.cosmos.request({
+            method: 'cos_account',
+            params: { chainName: chainId },
+          });
+          key = {
+            bech32Address: account.address,
+            algo: 'secp256k1',
+            pubKey: new Uint8Array(Buffer.from(account.publicKey, 'hex')),
+            isNanoLedger: false,
+          };
+        } else {
+          key = await wallet.getKey(chainId);
+        }
+        console.log(`✅ ${walletType} key retrieved after EVM re-config:`, key.bech32Address);
       } else {
         throw keyError;
       }
@@ -436,21 +507,49 @@ export async function connectKeplr(
       address: key.bech32Address,
       algo: key.algo,
       pubKey: key.pubKey,
-      isNanoLedger: key.isNanoLedger,
+      isNanoLedger: key.isNanoLedger || false,
     };
   } catch (error: any) {
-    console.error('Failed to connect to Keplr:', error);
+    console.error(`Failed to connect to ${walletType}:`, error);
     
     if (error.message?.includes('EthAccount') || error.message?.includes('Unsupported type')) {
-      throw new Error(`EVM chain not fully supported in this Keplr version. Please: 1) Update Keplr to latest version, 2) Clear browser cache, 3) Reconnect wallet. Error: ${error.message}`);
+      throw new Error(`EVM chain not fully supported in this wallet version. Please: 1) Update ${walletType} to latest version, 2) Clear browser cache, 3) Reconnect wallet. Error: ${error.message}`);
     }
     
     if (error.message?.includes('chain id') || error.message?.includes('signer')) {
-      throw new Error(`Chain ID mismatch. Please try: 1) Disconnect Keplr wallet, 2) Clear browser cache, 3) Reconnect. Chain ID: ${chainId}`);
+      throw new Error(`Chain ID mismatch. Please try: 1) Disconnect ${walletType} wallet, 2) Clear browser cache, 3) Reconnect. Chain ID: ${chainId}`);
     }
     
     throw error;
   }
+}
+
+// Main wallet connection function with wallet type selection
+export async function connectWalletWithType(
+  chain: ChainData, 
+  coinType?: 118 | 60,
+  walletType: 'keplr' | 'leap' | 'cosmostation' = 'keplr'
+): Promise<KeplrAccount> {
+  let wallet: any;
+  
+  if (walletType === 'leap') {
+    if (!isLeapInstalled()) {
+      throw new Error('Leap extension is not installed');
+    }
+    wallet = getLeap();
+  } else if (walletType === 'cosmostation') {
+    if (!isCosmostationInstalled()) {
+      throw new Error('Cosmostation extension is not installed');
+    }
+    wallet = getCosmostation();
+  } else {
+    if (!isKeplrInstalled()) {
+      throw new Error('Keplr extension is not installed');
+    }
+    wallet = getKeplr();
+  }
+  
+  return _connectWalletCore(wallet, chain, coinType, walletType);
 }
 export function disconnectKeplr(): void {
   if (typeof window !== 'undefined') {
@@ -516,6 +615,26 @@ declare global {
       getOfflineSigner: (chainId: string) => any;
       getOfflineSignerAuto: (chainId: string) => Promise<any>;
       getOfflineSignerOnlyAmino: (chainId: string) => Promise<any>;
+    };
+    leap?: {
+      enable: (chainId: string) => Promise<void>;
+      getKey: (chainId: string) => Promise<{
+        bech32Address: string;
+        algo: string;
+        pubKey: Uint8Array;
+        isNanoLedger: boolean;
+      }>;
+      experimentalSuggestChain: (chainInfo: KeplrChainInfo) => Promise<void>;
+      getOfflineSigner: (chainId: string) => any;
+      getOfflineSignerAuto: (chainId: string) => Promise<any>;
+    };
+    cosmostation?: {
+      cosmos: {
+        request: (params: { method: string; params?: any }) => Promise<any>;
+      };
+      providers: {
+        keplr: any;
+      };
     };
   }
 }

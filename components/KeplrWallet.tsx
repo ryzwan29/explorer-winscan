@@ -5,7 +5,10 @@ import { ChainData } from '@/types/chain';
 import { useWallet } from '@/contexts/WalletContext';
 import {
   isKeplrInstalled,
+  isLeapInstalled,
+  isCosmostationInstalled,
   connectKeplr,
+  connectWalletWithType,
   disconnectKeplr,
   saveKeplrAccount,
 } from '@/lib/keplr';
@@ -27,7 +30,7 @@ export default function KeplrWallet({ selectedChain }: KeplrWalletProps) {
   const [error, setError] = useState<string | null>(null);
   const [coinType, setCoinType] = useState<118 | 60>(118);
   const [showModal, setShowModal] = useState(false);
-  const [walletType, setWalletType] = useState<'keplr' | 'metamask'>('keplr');
+  const [walletType, setWalletType] = useState<'keplr' | 'leap' | 'cosmostation' | 'metamask'>('keplr');
   const [bech32Address, setBech32Address] = useState<string>('');
 
   const isEvmChain = selectedChain && parseInt(selectedChain.coin_type || '118') === 60;
@@ -56,7 +59,7 @@ export default function KeplrWallet({ selectedChain }: KeplrWalletProps) {
     };
   }, [isConnected, selectedChain]);
 
-  const handleConnect = async (selectedCoinType: 118 | 60, selectedWalletType: 'keplr' | 'metamask' = 'keplr') => {
+  const handleConnect = async (selectedWalletType: 'keplr' | 'leap' | 'cosmostation' = 'keplr') => {
     if (!selectedChain) {
       setError('Please select a chain first');
       return;
@@ -67,53 +70,42 @@ export default function KeplrWallet({ selectedChain }: KeplrWalletProps) {
     setShowModal(false);
     
     try {
-      if (selectedWalletType === 'metamask') {
-        if (!isMetaMaskInstalled()) {
-          setError('MetaMask extension is not installed. Please install it from https://metamask.io/');
-          window.open('https://metamask.io/', '_blank');
-          return;
-        }
-        
-        const metaMaskAccount = await connectMetaMask(selectedChain);
-        
-        // Convert hex address to bech32 for Cosmos compatibility
-        const prefix = selectedChain.addr_prefix || 'cosmos';
-        const bech32Addr = await hexToBech32(metaMaskAccount.address, prefix);
-        setBech32Address(bech32Addr);
-        
-        // Store as KeplrAccount format for compatibility
-        const account = {
-          address: bech32Addr,
-          algo: 'ethsecp256k1' as const,
-          pubKey: new Uint8Array(),
-          isNanoLedger: false,
-        };
-        
-        setAccount(account);
-        setWalletType('metamask');
-        setCoinType(60);
-        saveMetaMaskAccount(metaMaskAccount);
-        window.dispatchEvent(new CustomEvent('keplr_wallet_changed'));
-        
-      } else {
-        // Keplr connection
-        if (!isKeplrInstalled()) {
-          setError('Keplr extension is not installed. Please install it from https://www.keplr.app/');
-          window.open('https://www.keplr.app/', '_blank');
-          return;
-        }
-        
-        const connectedAccount = await connectKeplr(selectedChain, selectedCoinType);
-        setAccount(connectedAccount);
-        setWalletType('keplr');
-        setCoinType(selectedCoinType);
-        const chainId = selectedChain.chain_id || selectedChain.chain_name;
-        saveKeplrAccount(connectedAccount, chainId, selectedCoinType);
-        window.dispatchEvent(new CustomEvent('keplr_wallet_changed'));
+      // Auto-detect coin_type from chain config
+      const detectedCoinType = selectedChain.coin_type ? parseInt(selectedChain.coin_type) as (118 | 60) : 118;
+      
+      console.log('🔍 Auto-detected coin_type:', detectedCoinType, 'for chain:', selectedChain.chain_name);
+      
+      // Check wallet installation
+      if (selectedWalletType === 'leap' && !isLeapInstalled()) {
+        setError('Leap extension is not installed. Please install it from https://www.leapwallet.io/');
+        window.open('https://www.leapwallet.io/', '_blank');
+        return;
       }
+      
+      if (selectedWalletType === 'cosmostation' && !isCosmostationInstalled()) {
+        setError('Cosmostation extension is not installed. Please install it from https://cosmostation.io/');
+        window.open('https://cosmostation.io/', '_blank');
+        return;
+      }
+      
+      if (selectedWalletType === 'keplr' && !isKeplrInstalled()) {
+        setError('Keplr extension is not installed. Please install it from https://www.keplr.app/');
+        window.open('https://www.keplr.app/', '_blank');
+        return;
+      }
+      
+      // Connect with auto-detected coin_type
+      const connectedAccount = await connectWalletWithType(selectedChain, detectedCoinType, selectedWalletType);
+      setAccount(connectedAccount);
+      setWalletType(selectedWalletType);
+      setCoinType(detectedCoinType);
+      const chainId = selectedChain.chain_id || selectedChain.chain_name;
+      saveKeplrAccount(connectedAccount, chainId, detectedCoinType);
+      window.dispatchEvent(new CustomEvent('keplr_wallet_changed'));
+      
     } catch (err: any) {
       console.error('Wallet connection error:', err);
-      setError(err.message || `Failed to connect to ${selectedWalletType === 'metamask' ? 'MetaMask' : 'Keplr'}`);
+      setError(err.message || `Failed to connect to ${selectedWalletType}`);
       setAccount(null);
     } finally {
       setIsConnecting(false);
@@ -143,6 +135,13 @@ export default function KeplrWallet({ selectedChain }: KeplrWalletProps) {
     if (!address) return '';
     return `${address.slice(0, 10)}...${address.slice(-6)}`;
   };
+
+  const getWalletDisplayName = () => {
+    if (walletType === 'metamask') return 'MetaMask';
+    if (walletType === 'leap') return 'Leap';
+    if (walletType === 'cosmostation') return 'Cosmostation';
+    return 'Keplr';
+  };
   return (
     <>
       <div className="flex items-center gap-2">
@@ -163,7 +162,7 @@ export default function KeplrWallet({ selectedChain }: KeplrWalletProps) {
                 {account && formatAddress(account.address)}
               </code>
               <span className="text-xs text-gray-500 bg-gray-800 px-2 py-1 rounded">
-                {walletType === 'metamask' ? 'MetaMask' : `Type ${coinType}`}
+                {getWalletDisplayName()}
               </span>
             </div>
             <button
@@ -191,146 +190,164 @@ export default function KeplrWallet({ selectedChain }: KeplrWalletProps) {
           </button>
         </div>
       )}
-      {}
+
+      {/* Wallet Selection Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in" onClick={() => setShowModal(false)}>
-          <div className="bg-[#1a1a1a] border border-gray-700 rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl animate-scale-in" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                <Wallet className="w-6 h-6 text-blue-400" />
-                Connect Keplr Wallet
-              </h3>
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 animate-fade-in p-4" onClick={() => setShowModal(false)}>
+          <div className="bg-gradient-to-b from-[#1a1a1a] to-[#0f0f0f] border border-gray-800 rounded-2xl p-8 max-w-2xl w-full shadow-2xl animate-scale-in" onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h3 className="text-2xl font-bold text-white mb-2 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                    <Wallet className="w-6 h-6 text-white" />
+                  </div>
+                  Connect Wallet
+                </h3>
+                <p className="text-gray-400 text-sm">
+                  Choose your preferred wallet to connect to <span className="text-blue-400 font-medium">{selectedChain?.chain_name}</span>
+                </p>
+              </div>
               <button
                 onClick={() => setShowModal(false)}
-                className="p-2 hover:bg-gray-800 rounded-lg transition-all duration-200 hover:scale-110 active:scale-95"
+                className="p-2 hover:bg-gray-800 rounded-xl transition-all duration-200 hover:scale-110 active:scale-95 group"
               >
-                <X className="w-5 h-5 text-gray-400 hover:text-white transition-colors" />
+                <X className="w-6 h-6 text-gray-400 group-hover:text-white transition-colors" />
               </button>
             </div>
-            <p className="text-gray-400 text-sm mb-6 leading-relaxed">
-              Choose wallet for <span className="text-white font-medium">{selectedChain?.chain_name || 'this chain'}</span>
-              {isEvmChain && <span className="block text-xs text-purple-400 mt-2 flex items-center gap-1">⚡ EVM-compatible chain detected</span>}
-            </p>
-            <div className="space-y-3">
-              {/* MetaMask option for EVM chains */}
-              {isEvmChain && (
-                <button
-                  onClick={() => handleConnect(60, 'metamask')}
-                  disabled={isConnecting}
-                  className="w-full p-4 bg-gradient-to-r from-orange-500/20 to-orange-600/20 hover:from-orange-500/30 hover:to-orange-600/30 border border-orange-500/50 hover:border-orange-400 rounded-xl transition-all duration-300 group disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98]"
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-12 h-12 bg-orange-500/30 rounded-xl flex items-center justify-center group-hover:bg-orange-500/40 transition-all duration-300 group-hover:scale-110">
-                      <span className="text-2xl">🦊</span>
-                    </div>
-                    <div className="flex-1 text-left">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-white font-semibold">MetaMask</span>
-                        <span className="text-xs bg-orange-500/30 text-orange-300 px-2 py-0.5 rounded-full">EVM Native</span>
-                      </div>
-                      <p className="text-sm text-gray-400 leading-relaxed">
-                        Connect with MetaMask for full EVM compatibility
-                      </p>
-                    </div>
-                    <Check className="w-5 h-5 text-gray-600 group-hover:text-orange-400 transition-all duration-300 group-hover:scale-110" />
-                  </div>
-                </button>
-              )}
-              {/* Keplr Cosmos Standard */}
+            
+            {/* Wallet Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              {/* Keplr Wallet */}
               <button
-                onClick={() => handleConnect(118, 'keplr')}
+                onClick={() => handleConnect('keplr')}
                 disabled={isConnecting}
-                className="w-full p-4 bg-gray-800/80 hover:bg-gray-700 border border-gray-700 hover:border-blue-500 rounded-xl transition-all duration-300 group disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98]"
+                className="relative p-6 bg-gradient-to-br from-blue-500/10 to-blue-600/5 hover:from-blue-500/20 hover:to-blue-600/10 border border-blue-500/20 hover:border-blue-500/40 rounded-2xl transition-all duration-300 group disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 active:scale-95 hover:shadow-lg hover:shadow-blue-500/20"
               >
-                <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center group-hover:bg-blue-500/30 transition-all duration-300 group-hover:scale-110">
-                    <svg viewBox="0 0 256 256" className="w-8 h-8">
-                      <defs>
-                        <linearGradient id="keplrGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" style={{ stopColor: '#3b82f6', stopOpacity: 1 }} />
-                          <stop offset="100%" style={{ stopColor: '#60a5fa', stopOpacity: 1 }} />
-                        </linearGradient>
-                      </defs>
-                      <circle cx="128" cy="128" r="120" fill="url(#keplrGrad)" />
-                      <path d="M128 60 L180 100 L180 156 L128 196 L76 156 L76 100 Z" fill="white" opacity="0.9" />
-                      <circle cx="128" cy="128" r="25" fill="url(#keplrGrad)" />
-                    </svg>
+                <div className="flex flex-col items-center text-center">
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500/20 to-blue-600/10 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                    <img 
+                      src="https://cdn.prod.website-files.com/667dc891bc7b863b5397495b/68a4ca95f93a9ab64dc67ab4_keplr-symbol.svg" 
+                      alt="Keplr"
+                      className="w-10 h-10"
+                    />
                   </div>
-                  <div className="flex-1 text-left">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-white font-semibold">Keplr - Cosmos</span>
-                      <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full">118</span>
-                    </div>
-                    <p className="text-sm text-gray-400 leading-relaxed">
-                      Standard Cosmos SDK chains
-                    </p>
-                  </div>
-                  <Check className="w-5 h-5 text-gray-600 group-hover:text-blue-400 transition-all duration-300 group-hover:scale-110" />
+                  <h4 className="text-white font-bold text-lg mb-1">Keplr</h4>
+                  <span className="text-xs bg-blue-500/20 text-blue-400 px-3 py-1 rounded-full mb-2 font-medium">Most Popular</span>
+                  <p className="text-sm text-gray-400 leading-relaxed">
+                    The #1 Cosmos wallet
+                  </p>
+                </div>
+                <div className="absolute top-3 right-3 w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Check className="w-4 h-4 text-blue-400" />
                 </div>
               </button>
-              {/* Keplr EVM Compatible */}
+
+              {/* Leap Wallet */}
               <button
-                onClick={() => handleConnect(60, 'keplr')}
+                onClick={() => handleConnect('leap')}
                 disabled={isConnecting}
-                className="w-full p-4 bg-gray-800/80 hover:bg-gray-700 border border-gray-700 hover:border-purple-500 rounded-xl transition-all duration-300 group disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98]"
+                className="relative p-6 bg-gradient-to-br from-purple-500/10 to-purple-600/5 hover:from-purple-500/20 hover:to-purple-600/10 border border-purple-500/20 hover:border-purple-500/40 rounded-2xl transition-all duration-300 group disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 active:scale-95 hover:shadow-lg hover:shadow-purple-500/20"
               >
-                <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center group-hover:bg-purple-500/30 transition-all duration-300 group-hover:scale-110">
-                    <svg viewBox="0 0 256 256" className="w-8 h-8">
-                      <defs>
-                        <linearGradient id="keplrGradEvm" x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" style={{ stopColor: '#a855f7', stopOpacity: 1 }} />
-                          <stop offset="100%" style={{ stopColor: '#c084fc', stopOpacity: 1 }} />
-                        </linearGradient>
-                      </defs>
-                      <circle cx="128" cy="128" r="120" fill="url(#keplrGradEvm)" />
-                      <path d="M128 60 L180 100 L180 156 L128 196 L76 156 L76 100 Z" fill="white" opacity="0.9" />
-                      <circle cx="128" cy="128" r="25" fill="url(#keplrGradEvm)" />
-                    </svg>
+                <div className="flex flex-col items-center text-center">
+                  <div className="w-16 h-16 bg-gradient-to-br from-purple-500/20 to-purple-600/10 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                    <img 
+                      src="https://pbs.twimg.com/profile_images/1771942341072318464/yrLlUePo_400x400.jpg" 
+                      alt="Leap"
+                      className="w-10 h-10 rounded-xl"
+                    />
                   </div>
-                  <div className="flex-1 text-left">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-white font-semibold">Keplr - EVM</span>
-                      <span className="text-xs bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded-full">60</span>
-                    </div>
-                    <p className="text-sm text-gray-400 leading-relaxed">
-                      EVM-compatible chains
-                    </p>
+                  <h4 className="text-white font-bold text-lg mb-1">Leap</h4>
+                  <span className="text-xs bg-purple-500/20 text-purple-400 px-3 py-1 rounded-full mb-2 font-medium">Fast & Modern</span>
+                  <p className="text-sm text-gray-400 leading-relaxed">
+                    Super-fast wallet
+                  </p>
+                </div>
+                <div className="absolute top-3 right-3 w-6 h-6 bg-purple-500/20 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Check className="w-4 h-4 text-purple-400" />
+                </div>
+              </button>
+
+              {/* Cosmostation Wallet */}
+              <button
+                onClick={() => handleConnect('cosmostation')}
+                disabled={isConnecting}
+                className="relative p-6 bg-gradient-to-br from-orange-500/10 to-orange-600/5 hover:from-orange-500/20 hover:to-orange-600/10 border border-orange-500/20 hover:border-orange-500/40 rounded-2xl transition-all duration-300 group disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 active:scale-95 hover:shadow-lg hover:shadow-orange-500/20"
+              >
+                <div className="flex flex-col items-center text-center">
+                  <div className="w-16 h-16 bg-gradient-to-br from-orange-500/20 to-orange-600/10 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                    <img 
+                      src="https://pbs.twimg.com/profile_images/1141994412450254849/nWwjGAZN_400x400.png" 
+                      alt="Cosmostation"
+                      className="w-10 h-10 rounded-xl object-contain"
+                    />
                   </div>
-                  <Check className="w-5 h-5 text-gray-600 group-hover:text-purple-400 transition-all duration-300 group-hover:scale-110" />
+                  <h4 className="text-white font-bold text-lg mb-1">Cosmostation</h4>
+                  <span className="text-xs bg-orange-500/20 text-orange-400 px-3 py-1 rounded-full mb-2 font-medium">Trusted</span>
+                  <p className="text-sm text-gray-400 leading-relaxed">
+                    Cosmos ecosystem
+                  </p>
+                </div>
+                <div className="absolute top-3 right-3 w-6 h-6 bg-orange-500/20 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Check className="w-4 h-4 text-orange-400" />
                 </div>
               </button>
             </div>
-            <div className="mt-6 p-4 bg-gray-800/50 border border-gray-700 rounded-xl">
-              <p className="text-xs text-gray-400 leading-relaxed">
-                <strong className="text-gray-300">Note:</strong> {isEvmChain 
-                  ? 'For EVM chains, MetaMask provides the best compatibility. Alternatively, use Keplr with coin type 60.'
-                  : 'Most Cosmos chains use Keplr with coin type 118. Only select type 60 for EVM-compatible chains.'}
-              </p>
+
+            {/* Info Section */}
+            <div className="bg-gradient-to-r from-gray-800/50 to-gray-800/30 border border-gray-700/50 rounded-xl p-4 mb-6">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <AlertCircle className="w-5 h-5 text-blue-400" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm text-gray-300 leading-relaxed">
+                    <span className="font-semibold text-white">Auto-detection enabled:</span> The wallet will automatically use the correct coin type (60 or 118) based on the chain configuration.
+                  </p>
+                </div>
+              </div>
             </div>
-            <div className="mt-4 flex justify-center gap-6 text-xs">
+
+            {/* Footer Links */}
+            <div className="flex items-center justify-center gap-6 pt-4 border-t border-gray-800">
               <a
                 href="https://www.keplr.app/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-400 hover:text-blue-300 transition-all duration-200 hover:scale-110 font-medium"
+                className="text-sm text-gray-400 hover:text-blue-400 transition-colors flex items-center gap-2 group"
               >
-                Get Keplr →
+                <span>Get Keplr</span>
+                <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
               </a>
-              {isEvmChain && (
-                <a
-                  href="https://metamask.io/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-orange-400 hover:text-orange-300 transition-all duration-200 hover:scale-110 font-medium"
-                >
-                  Get MetaMask →
-                </a>
-              )}
+              <a
+                href="https://www.leapwallet.io/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-gray-400 hover:text-purple-400 transition-colors flex items-center gap-2 group"
+              >
+                <span>Get Leap</span>
+                <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </a>
+              <a
+                href="https://cosmostation.io/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-gray-400 hover:text-orange-400 transition-colors flex items-center gap-2 group"
+              >
+                <span>Get Cosmostation</span>
+                <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </a>
             </div>
           </div>
         </div>
       )}
+
       <style jsx>{`
         @keyframes slide-in {
           from {
