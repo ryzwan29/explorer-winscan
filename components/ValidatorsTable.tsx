@@ -366,26 +366,54 @@ const ValidatorRow = memo(({
       </td>
       <td className="px-6 py-4">
         <div className="flex items-center justify-center">
-          {isConnected ? (
-            autoCompoundEnabled ? (
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  if (!chain) return;
-                  // Call parent to show disable confirmation
-                  onAutoCompoundAction(validator, 'disable');
-                }}
-                className="group relative px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 bg-green-500/20 hover:bg-red-500/20 text-green-400 hover:text-red-400 border border-green-500/50 hover:border-red-500/50 hover:scale-105 active:scale-95"
-              >
-                <span className="flex items-center gap-1.5">
-                  <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                  </svg>
-                  <span className="hidden group-hover:inline">Disable</span>
-                  <span className="group-hover:hidden">Enabled</span>
-                </span>
-              </button>
-            ) : (
+          {(() => {
+            // Check if chain supports authz
+            const unsupportedChains = ['paxi-mainnet', 'paxi-testnet'];
+            const chainSupportsAuthz = !unsupportedChains.includes(chain?.chain_id || '');
+            
+            if (!chainSupportsAuthz) {
+              return (
+                <div className="px-3 py-1.5 text-xs font-medium rounded-lg bg-gray-500/10 text-gray-500 border border-gray-500/30" title="Auto-Compound not supported on this chain">
+                  <span className="flex items-center gap-1.5">
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                    </svg>
+                    N/A
+                  </span>
+                </div>
+              );
+            }
+            
+            if (!isConnected) {
+              return (
+                <div className="text-gray-600 text-xs">
+                  -
+                </div>
+              );
+            }
+            
+            if (autoCompoundEnabled) {
+              return (
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (!chain) return;
+                    onAutoCompoundAction(validator, 'disable');
+                  }}
+                  className="group relative px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 bg-green-500/20 hover:bg-red-500/20 text-green-400 hover:text-red-400 border border-green-500/50 hover:border-red-500/50 hover:scale-105 active:scale-95"
+                >
+                  <span className="flex items-center gap-1.5">
+                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    <span className="hidden group-hover:inline">Disable</span>
+                    <span className="group-hover:hidden">Enabled</span>
+                  </span>
+                </button>
+              );
+            }
+            
+            return (
               <button
                 onClick={(e) => {
                   e.preventDefault();
@@ -400,12 +428,8 @@ const ValidatorRow = memo(({
                   Enable
                 </span>
               </button>
-            )
-          ) : (
-            <div className="text-gray-600 text-xs">
-              -
-            </div>
-          )}
+            );
+          })()}
         </div>
       </td>
     </tr>

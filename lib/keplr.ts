@@ -2030,6 +2030,12 @@ export async function enableAutoCompound(
       throw new Error('Chain ID is required');
     }
 
+    // Check if chain supports authz module
+    const unsupportedChains = ['paxi-mainnet', 'paxi-testnet'];
+    if (unsupportedChains.includes(chainId)) {
+      throw new Error('Auto-Compound is not supported on this chain. The chain does not have the authz module enabled.');
+    }
+
     const coinType = parseInt(chain.coin_type || '118');
     const isEvmChain = coinType === 60;
     
