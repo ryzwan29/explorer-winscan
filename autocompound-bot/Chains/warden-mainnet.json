@@ -2,7 +2,7 @@
   "chain_name": "warden-mainnet",
   "chain_id": "warden_8765-1",
   "bech32_prefix": "warden",
-  "coin_type": "118",
+  "coin_type": "60",
   "apis": {
     "rpc": [
       {
@@ -38,7 +38,9 @@
       "moniker": "Winnode",
       "validator_address": "wardenvaloper1y9u0mhnh8gfklp3nsjdqczh36k2psjr649qm0z",
       "grantee_address": "warden1y9u0mhnh8gfklp3nsjdqczh36k2psjr6n0kry5",
-      "supported": true
+      "supported": true,
+      "default_frequency": "hourly",
+      "vote_option": "YES"
     }
   ]
 }

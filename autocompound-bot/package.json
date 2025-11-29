@@ -20,18 +20,22 @@
   "author": "WinScan",
   "license": "MIT",
   "dependencies": {
-    "@cosmjs/stargate": "^0.32.4",
+    "@cosmjs/amino": "^0.37.0",
+    "@cosmjs/crypto": "^0.32.4",
     "@cosmjs/proto-signing": "^0.32.4",
-    "cosmjs-types": "^0.9.0",
-    "express": "^4.18.2",
+    "@cosmjs/stargate": "^0.32.4",
+    "@keplr-wallet/cosmos": "^0.12.295",
     "cors": "^2.8.5",
-    "dotenv": "^16.3.1"
+    "cosmjs-types": "^0.9.0",
+    "dotenv": "^16.3.1",
+    "ethers": "^5.7.2",
+    "express": "^4.18.2"
   },
   "devDependencies": {
-    "@types/node": "^20.10.0",
-    "@types/express": "^4.17.21",
     "@types/cors": "^2.8.17",
-    "typescript": "^5.3.3",
-    "ts-node": "^10.9.2"
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.10.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
   }
 }

@@ -39,10 +39,34 @@ Visit http://localhost:3000
 
 ## 📖 Documentation
 
+- **[Auto-Compound Bot Guide](autocompound-bot/README.md)** - Setup validator auto-compound bot
 - **[Chain Configuration Guide](CHAIN-GUIDELINES.md)** - Add your blockchain
 - **[Contributing Guide](CONTRIBUTING.md)** - Contribution guidelines
 - **[Security Policy](SECURITY.md)** - Report vulnerabilities
 - **[License](LICENSE)** - Usage terms and restrictions
+
+## 🤖 Auto-Compound Bot
+
+WinScan includes a standalone auto-compound bot for validators to provide staking rewards compounding service to their delegators.
+
+**Key Features:**
+- ✅ Automated rewards compounding using Authz grants
+- ✅ Multi-chain support (Cosmos SDK & EVM-compatible)
+- ✅ Validator commission claiming
+- ✅ Governance auto-voting
+- ✅ Configurable frequency (hourly/daily/weekly/monthly)
+
+**Quick Setup:**
+```bash
+cd autocompound-bot
+npm install
+cp .env.example .env
+# Edit .env with your mnemonic
+npm run build
+npm start
+```
+
+**📚 Full Documentation:** [autocompound-bot/README.md](autocompound-bot/README.md)
 
 ## 🔧 Configuration
 

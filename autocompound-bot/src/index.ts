@@ -37,10 +37,10 @@ async function initializeBot() {
     const path = require('path');
     
     const possiblePaths = [
-      path.join(__dirname, '../../Chains'),
-      path.join(__dirname, '../Chains'),
-      path.join(process.cwd(), 'Chains'),
-      path.join(process.cwd(), '../Chains'),
+      path.join(__dirname, '../Chains'),      
+      path.join(process.cwd(), 'Chains'),  
+      path.join(__dirname, '../../Chains'), 
+      path.join(process.cwd(), '../Chains'), 
     ];
 
     let chainsDir = null;

@@ -40,7 +40,9 @@
       "moniker": "Winnode",
       "validator_address": "lumeravaloper1f88a86nkmcjk9ydx6vjj2txsehptmezs8j6wvg",
       "grantee_address": "lumera1h0c98tf2lynxtnp4dqh2wp03z4ca96lewmcly9",
-      "supported": true
+      "supported": true,
+      "default_frequency": "hourly",
+      "vote_option": "YES"
     }
   ]
 }

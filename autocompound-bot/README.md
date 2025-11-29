@@ -1,30 +1,41 @@
-# WinScan Auto-Compound Bot - Validator Setup Guide
+# WinScan Auto-Compound Bot
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)](https://nodejs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue.svg)](https://www.typescriptlang.org/)
-[![CosmJS](https://img.shields.io/badge/CosmJS-0.32-purple.svg)](https://github.com/cosmos/cosmjs)
-[![PM2](https://img.shields.io/badge/PM2-Ready-2B037A.svg)](https://pm2.keymetrics.io/)
+Automated staking rewards compounding bot for Cosmos chains using Authz grants.
 
-**Supported Chains:**
+## 🏗️ Architecture
 
-[![Cosmos Hub](https://img.shields.io/badge/Cosmos_Hub-cosmoshub--4-2E3148.svg)](https://cosmos.network/)
-[![Warden](https://img.shields.io/badge/Warden-warden__8765--1-1e2a38.svg)](https://wardenprotocol.org/)
-[![Warden Testnet](https://img.shields.io/badge/Warden_Testnet-barra__9191--1-1e2a38.svg)](https://wardenprotocol.org/)
-[![Lumera](https://img.shields.io/badge/Lumera-lumera--mainnet--1-812cd6.svg)](https://lumera.io/)
-[![Lumera Testnet](https://img.shields.io/badge/Lumera_Testnet-lumera--testnet--2-812cd6.svg)](https://lumera.io/)
-[![BitBadges](https://img.shields.io/badge/BitBadges-bitbadges--1-812cd6.svg)](https://bitbadges.io/)
+```
+┌─────────────────┐
+│   Delegator     │
+│   (User)        │
+└────────┬────────┘
+         │ 1. Grant authorization
+         │    (MsgGrant via WinScan UI)
+         ▼
+┌─────────────────┐
+│   Blockchain    │◄──────┐
+│   (Cosmos SDK)  │       │
+└────────┬────────┘       │
+         │                │
+         │ 2. Query       │ 4. Execute
+         │    Grants      │    MsgExec
+         │                │
+         ▼                │
+┌─────────────────────────┴──┐
+│   Validator's Bot          │
+│   (AutoCompoundBot)        │
+│                            │
+│   - Monitor grants         │
+│   - Check rewards          │
+│   - Compound automatically │
+└────────────────────────────┘
+```
 
-## 🎯 Overview
-
-Run your own auto-compound bot to serve your delegators. **No external API needed** - bot connects directly to blockchain RPC.
-
-## 📋 Requirements
-
-- Node.js 18+
-- Your validator operator wallet mnemonic
-- Server with 24/7 uptime
-- Basic blockchain RPC access
+**Key Features:**
+- ✅ **Decentralized** - Connects directly to blockchain RPC
+- ✅ **Non-custodial** - Uses Authz grants, never controls user funds
+- ✅ **Multi-chain** - Supports standard Cosmos chains and EVM-compatible chains (coin_type 60)
+- ✅ **Configurable** - Frequency settings per chain (hourly/daily/weekly/monthly)
 
 ## 🚀 Quick Start
 
@@ -32,7 +43,7 @@ Run your own auto-compound bot to serve your delegators. **No external API neede
 
 ```bash
 git clone https://github.com/winsnip-official/winscan.git
-cd winscan/backend-api
+cd winscan/autocompound-bot
 ```
 
 ### 2. Install Dependencies
@@ -41,342 +52,320 @@ cd winscan/backend-api
 npm install
 ```
 
-### 3. Generate Bot Wallet
+### 3. Configuration
 
-```bash
-# Generate new mnemonic for your bot operator
-node
-```
-
-In Node.js console:
-```javascript
-const { DirectSecp256k1HdWallet } = require('@cosmjs/proto-signing');
-
-(async () => {
-  const wallet = await DirectSecp256k1HdWallet.generate(12);
-  console.log('Bot Mnemonic:', wallet.mnemonic);
-  
-  // Test on your chain
-  const shidoWallet = await DirectSecp256k1HdWallet.fromMnemonic(wallet.mnemonic, { prefix: 'shido' });
-  const [account] = await shidoWallet.getAccounts();
-  console.log('Shido Address:', account.address);
-})();
-```
-
-**⚠️ IMPORTANT:** Save this mnemonic securely! This is your bot operator wallet.
-
-### 4. Fund Bot Wallet
-
-Your bot needs gas fees to execute auto-compound transactions.
-
-**Example funding needed:**
-- 100 delegators × 1 compound/day = 100 tx/day
-- ~0.001 token per tx = ~0.1 token/day
-- Fund ~10-50 tokens for safety buffer
-
-**Get addresses for all chains:**
-```javascript
-const wallet = await DirectSecp256k1HdWallet.fromMnemonic('YOUR_MNEMONIC', { prefix: 'PREFIX' });
-```
-
-Replace `PREFIX` with:
-- `shido` for Shido
-- `osmo` for Osmosis
-- `cosmos` for Cosmos Hub
-- etc.
-
-### 5. Configure Environment
+Copy environment template:
 
 ```bash
 cp .env.example .env
-nano .env
 ```
 
 Edit `.env`:
-```env
-# Server Configuration
-PORT=4000
-NODE_ENV=production
 
-# Bot Configuration
-OPERATOR_MNEMONIC=your twelve word bot mnemonic here
-BOT_AUTO_START=true
+```env
+DEFAULT_MNEMONIC=your twelve word mnemonic phrase here
 ```
 
-### 6. Register Your Bot
+**Generate a new mnemonic (recommended):**
 
-Add your validator to chain registry so delegators can find you:
+```bash
+npx @cosmjs/cli@latest
+> const wallet = await DirectSecp256k1HdWallet.generate(12)
+> console.log(wallet.mnemonic)
+```
 
-Edit `Chains/[your-chain].json`:
+⚠️ **Security:** Keep this mnemonic secure! It controls the operator wallet that executes transactions.
+
+### 4. Chain Configuration
+
+Add your chain configuration in `Chains/` directory. Example:
+
+**File: `Chains/mychain-mainnet.json`**
+
 ```json
 {
-  "chain_id": "shido_9008-1",
-  ...
+  "chain_name": "mychain-mainnet",
+  "chain_id": "mychain-1",
+  "bech32_prefix": "mychain",
+  "coin_type": "118",
+  "apis": {
+    "rpc": [
+      {
+        "address": "https://rpc.mychain.network",
+        "provider": "MyProvider"
+      }
+    ],
+    "rest": [
+      {
+        "address": "https://api.mychain.network",
+        "provider": "MyProvider"
+      }
+    ]
+  },
+  "staking": {
+    "staking_tokens": [
+      {
+        "denom": "utoken"
+      }
+    ]
+  },
+  "fees": {
+    "fee_tokens": [
+      {
+        "denom": "utoken",
+        "fixed_min_gas_price": 0.025,
+        "low_gas_price": 0.025,
+        "average_gas_price": 0.05,
+        "high_gas_price": 0.1
+      }
+    ]
+  },
   "autocompound_operators": [
     {
-      "moniker": "YourValidatorName",
-      "validator_address": "shidovaloper1xxx...your validator address",
-      "grantee_address": "shido1xxx...your bot address from step 3",
-      "supported": true
+      "moniker": "YourValidator",
+      "validator_address": "mychainvaloper1...",
+      "grantee_address": "mychain1...",
+      "supported": true,
+      "default_frequency": "daily",
+      "vote_option": "YES"
     }
   ]
 }
 ```
 
-Submit PR to WinScan repository or contact WinScan team to add your validator.
+**Configuration Fields:**
 
-### 7. Build & Run
+| Field | Description | Example |
+|-------|-------------|---------|
+| `chain_name` | Unique identifier | `"osmosis-mainnet"` |
+| `chain_id` | Blockchain chain ID | `"osmosis-1"` |
+| `bech32_prefix` | Address prefix | `"osmo"` |
+| `coin_type` | BIP44 coin type | `"118"` (Cosmos), `"60"` (ETH) |
+| `grantee_address` | Bot operator address | Generated from mnemonic |
+| `default_frequency` | Compound frequency | `"hourly"`, `"daily"`, `"weekly"`, `"monthly"` |
+
+**Coin Type Support:**
+- `"118"` - Standard Cosmos chains (SHA256 signing)
+- `"60"` - EVM-compatible chains (Keccak256 signing, ETH addresses)
+
+### 5. Fund Operator Wallet
+
+The bot needs gas fees to execute transactions. Fund the operator address with native tokens.
+
+**Get operator address:**
 
 ```bash
-# Build
 npm run build
+npm start
+# Check logs for operator address
+```
 
-# Run with PM2 (recommended)
-npm install -g pm2
-pm2 start ecosystem.config.js
+Example operator addresses (from same mnemonic):
+- Cosmos Hub: `cosmos1h8a79xln9gam52c6wzkulz2txyr0rkcrsdkzam`
+- Osmosis: `osmo1h8a79xln9gam52c6wzkulz2txyr0rkcrtp3ck8`
+- Shido (EVM): `shido1h8a79xln9gam52c6wzkulz2txyr0rkcrwcuh60`
 
-# Or run directly
+### 6. Run Bot
+
+**Development:**
+
+```bash
+npm run dev
+```
+
+**Production:**
+
+```bash
+npm run build
 npm start
 ```
 
-### 8. Verify Bot is Running
+**With PM2:**
 
 ```bash
-# Check status
-curl http://localhost:4000/api/autocompound/status
+pm2 start ecosystem.config.js
+pm2 logs autocompound-bot
+pm2 monit
+```
 
-# Expected response:
+## 📡 API Endpoints
+
+Bot exposes a REST API for monitoring and manual control:
+
+### Get Status
+
+```bash
+GET http://localhost:4000/api/autocompound/status
+```
+
+Response:
+```json
 {
   "isRunning": true,
-  "operatorAddress": "shido1xxx...",
-  "tasksCount": 0,
-  "tasks": []
+  "operatorAddress": "cosmos1h8a79xln9gam52c6wzkulz2txyr0rkcrsdkzam",
+  "tasksCount": 3,
+  "tasks": [
+    {
+      "chainId": "cosmoshub-4",
+      "granter": "cosmos1abc...",
+      "validator": "cosmosvaloper1def...",
+      "frequency": "daily",
+      "lastRun": "2025-11-29T10:30:00Z",
+      "hasCommissionGrant": true,
+      "hasVoteGrant": true
+    }
+  ]
 }
 ```
 
-### 9. Load Tasks from Blockchain
-
-Bot will automatically load grants on startup. To manually refresh:
+### Load Tasks from Chain
 
 ```bash
-curl -X POST http://localhost:4000/api/autocompound/load-tasks/shido_9008-1
+POST http://localhost:4000/api/autocompound/load-tasks/cosmoshub-4
 ```
 
-Bot will:
-- Query all grants where grantee = your bot address
-- Create tasks for each granter
-- Execute auto-compound based on frequency settings
-
-## 📊 Monitoring
-
-### View Logs
+### Manual Execute
 
 ```bash
-# PM2 logs
-pm2 logs blockchain-api
+POST http://localhost:4000/api/autocompound/execute
+Content-Type: application/json
 
-# Or check log files
-tail -f logs/out.log
-tail -f logs/error.log
-```
-
-### Expected Log Output
-
-```
-🚀 API Server running on port 4000
-🤖 Initializing Auto-Compound Bot...
-✅ Operator Address: shido1xxx...
-✅ Bot initialized successfully
-🚀 Bot started automatically
-📊 Loading tasks from shido_9008-1...
-🔍 Querying grants for operator: shido1xxx...
-✅ Found 15 grants on shido_9008-1
-➕ Added task: shido_9008-1-shido1abc...-shidovaloper1xxx... (granter: shido1abc..., grantee: shido1xxx...)
-➕ Added task: shido_9008-1-shido1def...-shidovaloper1xxx... (granter: shido1def..., grantee: shido1xxx...)
-...
-✅ Loaded tasks from shido_9008-1
-
-⏰ Processing 15 tasks...
-🔄 Executing auto-compound for shido1abc... on shido_9008-1
-🔑 Operator address: shido1xxx... (EVM)
-💰 Rewards available: 2.145000 shido
-📡 Broadcasting auto-compound transaction...
-✅ Auto-compound successful!
-   TX Hash: A1B2C3D4...
-   Height: 24871823
-   Gas Used: 171820/600000
-```
-
-## 🔧 Configuration
-
-### Adjust Gas Prices
-
-Edit `AutoCompoundBot.ts`:
-```typescript
-gasPrice: `0.025${chainData.fees?.fee_tokens[0]?.denom}`
-```
-
-Change `0.025` to higher/lower based on network conditions.
-
-### Change Check Interval
-
-Edit `AutoCompoundBot.ts`:
-```typescript
-setInterval(() => {
-  this.processAllTasks();
-}, 60 * 60 * 1000); // Every hour (default)
-```
-
-Change to:
-- `30 * 60 * 1000` = 30 minutes
-- `2 * 60 * 60 * 1000` = 2 hours
-
-### Minimum Reward Threshold
-
-Edit `AutoCompoundBot.ts`:
-```typescript
-if (parseFloat(rewards) < 0.01) { // Current: 0.01 tokens
-  console.log(`⚠️ Rewards too low, skipping...`);
-  return;
+{
+  "chainId": "cosmoshub-4",
+  "granter": "cosmos1abc...",
+  "validator": "cosmosvaloper1def..."
 }
 ```
 
-## 🐳 Docker Deployment (Alternative)
+### Start/Stop Bot
 
 ```bash
-# Build image
-docker build -t autocompound-bot .
-
-# Run container
-docker run -d \
-  --name autocompound-bot \
-  -e OPERATOR_MNEMONIC="your mnemonic" \
-  -e BOT_AUTO_START=true \
-  -p 4000:4000 \
-  autocompound-bot
+POST http://localhost:4000/api/autocompound/start
+POST http://localhost:4000/api/autocompound/stop
 ```
+
+## 🔄 How It Works
+
+1. **Grant Detection**: Bot queries blockchain for Authz grants where it's the grantee
+2. **Task Scheduling**: Checks every 10 minutes, executes based on frequency settings
+3. **Reward Claiming**: When time is due:
+   - Queries available rewards
+   - Skips if rewards < 0.01 token (gas optimization)
+   - Executes `MsgExec` with nested messages:
+     - `MsgWithdrawDelegatorReward` - Claim rewards
+     - `MsgWithdrawValidatorCommission` (if validator)
+     - `MsgDelegate` - Restake claimed rewards
+4. **Transaction Signing**: Uses appropriate signing method:
+   - SHA256 for standard Cosmos chains
+   - Keccak256 for EVM-compatible chains
 
 ## 🔐 Security Best Practices
 
-1. **Secure Mnemonic Storage**
-   - Use environment variables (never commit to git)
-   - Consider using KMS or hardware wallet for production
-   - Restrict file permissions: `chmod 600 .env`
+1. **Mnemonic Management**:
+   - Never commit `.env` to version control
+   - Use environment variables in production
+   - Consider hardware wallet or KMS for high-value operations
 
-2. **Firewall Configuration**
-   ```bash
-   # Only allow API access from localhost
-   ufw allow from 127.0.0.1 to any port 4000
-   ```
+2. **Gas Fee Monitoring**:
+   - Set up balance alerts for operator wallet
+   - Calculate required balance: `tasks × frequency × gas_fee`
+   - Refill before balance runs low
 
-3. **Monitor Bot Wallet Balance**
-   - Set up alerts for low balance
-   - Automate top-up process
-   - Track gas fee usage
+3. **Grant Permissions**:
+   - Bot can only execute authorized operations
+   - Users retain full control (can revoke anytime)
+   - Grants have expiration dates (default 1 year)
 
-4. **Backup & Recovery**
-   - Store mnemonic in secure location (not on server)
-   - Document recovery procedures
-   - Test recovery process
+## 📊 Monitoring
 
-## 📈 Business Model
+### Logs
 
-### Free Service
-- Attract more delegators to your validator
-- Increase staking competitiveness
-- Build reputation
+```bash
+# PM2
+pm2 logs autocompound-bot --lines 100
 
-### Paid Service
-- Charge commission from rewards (e.g., 5%)
-- Implement in `AutoCompoundBot.ts`:
-  ```typescript
-  const commission = parseFloat(rewards) * 0.05;
-  const netRewards = parseFloat(rewards) - commission;
-  // Delegate netRewards to validator
-  // Send commission to your wallet
-  ```
+# Direct
+tail -f logs/out.log
+```
 
-### Subscription Model
-- Monthly fee per delegator
-- Tiered pricing based on frequency
-- Premium features (custom schedules, notifications)
+### Metrics
 
-## 🆘 Troubleshooting
+Check `/api/autocompound/status` for:
+- Active tasks count
+- Last execution time per task
+- Operator address and balance
+- Running status
 
-### Bot not picking up grants
+## 🛠️ Troubleshooting
 
-**Check:**
-1. Bot operator address matches grantee in grants:
-   ```bash
-   curl "https://api.shido.com/cosmos/authz/v1beta1/grants/grantee/YOUR_BOT_ADDRESS"
-   ```
-2. Chain RPC accessible:
-   ```bash
-   curl "https://rpc.shido.com/status"
-   ```
-3. Bot logs for errors:
-   ```bash
-   pm2 logs
-   ```
+### No tasks loaded
 
-### Transaction failures
+**Possible causes:**
+- RPC/REST endpoints not accessible
+- No grants exist where bot is grantee
+- Operator address mismatch in chain config
+
+**Solution:**
+1. Test RPC: `curl https://rpc.chain.network/status`
+2. Verify grants on-chain explorer
+3. Check `grantee_address` matches operator address
+
+### Transaction fails
 
 **Common errors:**
-- `out of gas`: Increase gas limit
-- `insufficient funds`: Top up bot wallet
-- `authorization not found`: Grant expired or revoked
-- `invalid signature`: Check mnemonic/key derivation
 
-### High gas usage
+| Error | Cause | Solution |
+|-------|-------|----------|
+| `out of gas` | Gas limit too low | Increase gas in `AutoCompoundBot.ts` |
+| `insufficient funds` | Not enough gas fees | Fund operator wallet |
+| `authorization not found` | Grant expired/revoked | User needs to re-grant |
+| `account sequence mismatch` | Parallel execution | Normal - will retry next cycle |
 
-**Solutions:**
-- Increase minimum reward threshold
-- Adjust compound frequency
-- Batch multiple operations (future feature)
-- Use cheaper RPC endpoints
+### Rewards not compounding
 
-## 🤝 Support
+**Checklist:**
+- [ ] Rewards balance > 0.01 token?
+- [ ] Frequency time elapsed?
+- [ ] Gas fees available?
+- [ ] Grant still valid?
 
-- GitHub Issues: https://github.com/winsnip-official/winscan/issues
-- Discord: https://discord.gg/winsnip
-- Telegram: https://t.me/winsnip
-
-## 📝 API Endpoints (Optional)
-
-If you want to expose bot status to delegators:
-
+Check task status via API:
 ```bash
-# Get bot status
-GET /api/autocompound/status
-
-# Manually trigger compound (for testing)
-POST /api/autocompound/execute
-{
-  "chainId": "shido_9008-1",
-  "granter": "shido1abc...",
-  "validator": "shidovaloper1xxx..."
-}
+curl http://localhost:4000/api/autocompound/status | jq '.tasks[] | select(.chainId=="your-chain")'
 ```
 
-**Security:** Add authentication if exposing publicly.
+## 📁 Project Structure
 
-## 🔄 Updates
-
-Check for updates regularly:
-```bash
-cd backend-api
-git pull
-npm install
-npm run build
-pm2 restart blockchain-api
 ```
+autocompound-bot/
+├── src/
+│   ├── index.ts              # Express server & initialization
+│   └── AutoCompoundBot.ts    # Core bot logic
+├── Chains/                   # Chain configurations
+│   ├── cosmoshub-mainnet.json
+│   ├── osmosis-mainnet.json
+│   └── shido-mainnet.json
+├── dist/                     # Compiled JavaScript
+├── logs/                     # Application logs
+├── .env                      # Environment variables (gitignored)
+├── .env.example              # Environment template
+├── ecosystem.config.js       # PM2 configuration
+├── package.json
+└── tsconfig.json
+```
+
+## 🔗 Related Projects
+
+- **WinScan Explorer**: https://winscan.io
+- **Cosmos SDK**: https://github.com/cosmos/cosmos-sdk
+- **CosmJS**: https://github.com/cosmos/cosmjs
 
 ## 📄 License
 
-MIT License - Free to use and modify
+MIT License - See LICENSE file for details
 
----
+## 🤝 Support
 
-**Questions?** Open an issue on GitHub or reach out to WinScan team.
-
-**Contributing?** Submit PR to add features or fix bugs!
+- **Discord**: https://discord.gg/winscan
+- **Telegram**: https://t.me/winscan
+- **GitHub Issues**: https://github.com/winsnip-official/winscan/issues
