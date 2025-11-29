@@ -28,10 +28,10 @@
     "fee_tokens": [
       {
         "denom": "ulume",
-        "fixed_min_gas_price": 800,
-        "low_gas_price": 800,
-        "average_gas_price": 1000,
-        "high_gas_price": 1500
+        "fixed_min_gas_price": 0.025,
+        "low_gas_price": 0.025,
+        "average_gas_price": 0.05,
+        "high_gas_price": 0.1
       }
     ]
   },
@@ -40,7 +40,9 @@
       "moniker": "Winnode",
       "validator_address": "lumeravaloper1gapqwfgz45mw2lrvy5nwks9ndfkdzn6pg0u69s",
       "grantee_address": "lumera1h0c98tf2lynxtnp4dqh2wp03z4ca96lewmcly9",
-      "supported": true
+      "supported": true,
+      "default_frequency": "hourly",
+      "vote_option": "YES"
     }
   ]
 }

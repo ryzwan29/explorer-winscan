@@ -14,15 +14,16 @@
   "dependencies": {
     "@cosmjs/proto-signing": "^0.37.0",
     "@cosmjs/stargate": "^0.37.0",
+    "@keplr-wallet/cosmos": "^0.12.295",
     "axios": "^1.7.2",
     "bech32": "^2.0.0",
+    "cosmjs-types": "^0.9.0",
     "date-fns": "^3.6.0",
     "ethers": "^6.15.0",
     "long": "^5.3.2",
     "lucide-react": "^0.427.0",
     "next": "14.2.5",
     "osmojs": "^16.15.0",
-    "cosmjs-types": "^0.9.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-simple-maps": "^3.0.0"
