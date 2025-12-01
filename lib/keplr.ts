@@ -1193,8 +1193,7 @@ export async function executeWithdrawAll(
     }
 
     const denom = chain.assets?.[0]?.base || 'uatom';
-    const gasPriceAmount = (chain as any).fees?.fee_tokens?.[0]?.low_gas_price || chain.min_tx_fee || 0.025;
-    const gasPrice = `${gasPriceAmount}${denom}`;
+    const gasPrice = `0.025${denom}`;
 
     console.log('📤 Sending transaction with', messages.length, 'message(s)');
 
@@ -1379,8 +1378,7 @@ export async function executeWithdrawAllValidators(
     }
 
     const denom = chain.assets?.[0]?.base || 'uatom';
-    const gasPriceAmount = (chain as any).fees?.fee_tokens?.[0]?.low_gas_price || chain.min_tx_fee || 0.025;
-    const gasPrice = `${gasPriceAmount}${denom}`;
+    const gasPrice = `0.025${denom}`;
 
     console.log('📤 Sending transaction with', messages.length, 'message(s)');
 
@@ -1619,8 +1617,7 @@ export async function executeSend(
     console.log('✅ SigningStargateClient connected');
 
     const exponent = parseInt(String(chain.assets?.[0]?.exponent || '6'));
-    const gasPriceAmount = (chain as any).fees?.fee_tokens?.[0]?.low_gas_price || chain.min_tx_fee || 0.025;
-    const gasPrice = `${gasPriceAmount}${params.denom}`;
+    const gasPrice = `0.025${params.denom}`;
 
     const sendMsg = {
       typeUrl: '/cosmos.bank.v1beta1.MsgSend',
@@ -1819,8 +1816,7 @@ export async function executeVote(
     // @ts-ignore
     const { SigningStargateClient, GasPrice } = await import('@cosmjs/stargate');
     
-    const gasPriceAmount = (chain as any).fees?.fee_tokens?.[0]?.low_gas_price || chain.min_tx_fee || 0.025;
-    const gasPrice = GasPrice.fromString(`${gasPriceAmount}${chain.assets?.[0]?.base || 'uatom'}`);
+    const gasPrice = GasPrice.fromString(`${chain.min_tx_fee || '0.025'}${chain.assets?.[0]?.base || 'uatom'}`);
     
     const clientOptions: any = {
       gasPrice,
