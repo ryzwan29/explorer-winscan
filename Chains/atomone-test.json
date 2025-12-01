@@ -27,7 +27,18 @@
   ],
   "sdk_version": "0.47.16",
   "coin_type": "118",
-  "min_tx_fee": "0.03",
+  "min_tx_fee": "0.001",
+  "fees": {
+    "fee_tokens": [
+      {
+        "denom": "uphoton",
+        "fixed_min_gas_price": 0.001,
+        "low_gas_price": 0.001,
+        "average_gas_price": 0.0025,
+        "high_gas_price": 0.005
+      }
+    ]
+  },
   "assets": [
     {
       "base": "uatone",
