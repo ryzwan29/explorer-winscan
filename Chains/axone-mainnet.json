@@ -25,16 +25,12 @@
   ],
   "rpc": [
     {
+      "address": "https://rpc-axone.winnode.xyz",
+      "provider": "WinNode"
+    },
+    {
       "address": "https://rpc.axone.cumulo.com.es",
       "provider": "Cumulo"
-    },
-    {
-      "address": "https://axone.rpc.bccnodes.com",
-      "provider": "BccNodes"
-    },
-    {
-      "address": "https://axone-rpc.highstakes.ch",
-      "provider": "High Stakes 🇨🇭"
     },
     {
       "address": "https://rpc.axone.nodestake.org",
@@ -53,7 +49,6 @@
       "base": "uaxone",
       "symbol": "AXONE",
       "exponent": "6",
-      "coingecko_id": "unknown",
       "logo": ""
     }
   ],
