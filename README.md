@@ -12,14 +12,31 @@
 
 ## ✨ Features
 
-- 🌐 Multi-chain support for Cosmos networks
-- 📊 Real-time blocks, transactions, validators tracking
-- 💼 Keplr wallet integration (stake, vote, transfer)
-- 🗳️ Governance proposals with voting
-- 📈 Validator uptime monitoring
-- 🌍 7 languages support
-- 🎨 Modern dark theme UI
-- 📱 Fully responsive
+### Core Features
+- 🌐 **Multi-Chain Support** - Cosmos SDK chains with IBC compatibility
+- 📊 **Real-Time Tracking** - Live blocks, transactions, validators monitoring
+- 💼 **Wallet Integration** - Keplr, Leap, Cosmostation support
+- 🔗 **IBC Tracking** - Cross-chain transfer monitoring
+- 🗳️ **Governance** - View and vote on proposals
+- 📈 **Validator Analytics** - Uptime, commission, voting power tracking
+- 🌍 **Multi-Language** - 7 languages support (EN, ID, JP, KR, CN, ES, RU)
+- 🎨 **Modern UI** - Dark theme, responsive design
+
+### EVM Support
+- ⚡ **EVM Explorer** - Native support for Cosmos chains with EVM sidechain
+- 🔍 **EVM Blocks** - Real-time EVM block tracking
+- 💸 **EVM Transactions** - Transaction details with gas info
+- 👛 **EVM Addresses** - Balance, transaction history
+- 🔗 **Dual Chain** - Seamless navigation between Cosmos & EVM
+- 🌐 **CORS-Free** - Server-side API with automatic fallback
+
+### Advanced Features
+- 🤖 **Auto-Compound Bot** - Automated staking rewards compounding
+- 📊 **Token Analytics** - Price tracking, supply metrics
+- 💰 **Asset Management** - Multi-asset support, holder tracking
+- 🔄 **State Sync** - Fast node synchronization endpoints
+- 🚀 **Performance** - Optimized with caching and CDN
+- 📱 **PWA Ready** - Progressive Web App capabilities
 
 ## 🚀 Quick Start
 
@@ -109,6 +126,8 @@ NEXT_PUBLIC_API_URL=https://ssl.winsnip.xyz
 | **Charts** | Recharts |
 | **API** | REST (WinSnip Public) |
 | **Wallet** | Keplr / Leap / Cosmostation |
+| **EVM** | ethers.js, JSON-RPC |
+| **Blockchain** | CosmJS, Cosmos SDK |
 
 </div>
 
@@ -157,11 +176,16 @@ We welcome contributions! Please read [CONTRIBUTING.md](CONTRIBUTING.md) first.
 
 ## 💎 Supported Chains
 
-### Mainnets
-- Paxi Network, Axone, BitBadges, Gitopia, Humans.ai, Shido
+### Mainnets (Cosmos)
+- Paxi Network, Axone, BitBadges, Gitopia, Humans.ai, Lumera, Noble, Osmosis, Sunrise, Tellor, Zenrock
+
+### Mainnets (EVM Compatible)
+- **Shido** - Full Cosmos + EVM support with WebSocket
+- **Warden Protocol** - Cosmos + EVM sidechain
+- **XRPL EVM Sidechain** - XRP Ledger EVM compatibility
 
 ### Testnets
-- CNHO-Stables, Safrochain, Lumera
+- CNHO-Stables, Safrochain, Lumera, AtomOne, Empeiria, Kiichain, Warden Barra
 
 **Want to add your chain?** See [CHAIN-GUIDELINES.md](CHAIN-GUIDELINES.md)
 
