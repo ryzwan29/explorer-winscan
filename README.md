@@ -182,10 +182,10 @@ We welcome contributions! Please read [CONTRIBUTING.md](CONTRIBUTING.md) first.
 
 | Chain | Logo | Type | Status |
 |-------|------|------|--------|
-| **AtomOne** | <img src="https://raw.githubusercontent.com/cosmos/chain-registry/master/atomone/images/atone.png" width="24"/> | Cosmos | ✅ Active |
+| **AtomOne** | <img src="https://pbs.twimg.com/profile_images/1891894823390429185/9swkoZNn_400x400.png" width="24"/> | Cosmos | ✅ Active |
 | **Axone** | <img src="https://raw.githubusercontent.com/cosmos/chain-registry/master/axone/images/axone.png" width="24"/> | Cosmos | ✅ Active |
 | **BitBadges** | <img src="https://raw.githubusercontent.com/cosmos/chain-registry/master/bitbadges/images/bitbadgeslogo.png" width="24"/> | Cosmos | ✅ Active |
-| **CNHO Stables** | <img src="https://explorer.winsnip.xyz/_next/image?url=https%3A%2F%2Fraw.githubusercontent.com%2Fcosmos%2Fchain-registry%2Fmaster%2Ftestnets%2Fcnhostablestestnet%2Fimages%2Fcnho.png&w=48&q=75" width="24"/> | Cosmos | ✅ Active |
+| **CNHO Stables** | <img src="https://pbs.twimg.com/profile_images/1802555804798857216/ZTqy2yxX_400x400.jpg" width="24"/> | Cosmos | ✅ Active |
 | **CosmosHub** | <img src="https://raw.githubusercontent.com/cosmos/chain-registry/master/cosmoshub/images/atom.png" width="24"/> | Cosmos | ✅ Active |
 | **Gitopia** | <img src="https://raw.githubusercontent.com/cosmos/chain-registry/master/gitopia/images/gitopia.png" width="24"/> | Cosmos | ✅ Active |
 | **Humans.ai** | <img src="https://raw.githubusercontent.com/cosmos/chain-registry/master/humans/images/heart-dark-mode.png" width="24"/> | Cosmos | ✅ Active |
