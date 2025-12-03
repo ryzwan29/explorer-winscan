@@ -198,8 +198,8 @@ We welcome contributions! Please read [CONTRIBUTING.md](CONTRIBUTING.md) first.
 | **Sunrise** | <img src="https://pbs.twimg.com/profile_images/1950927820290715648/1HjqE_hD_400x400.jpg" width="24"/> | Cosmos | ✅ Active |
 | **Tellor** | <img src="https://pbs.twimg.com/profile_images/1855433907556044800/_Bo9JjTR_400x400.png" width="24"/> | Cosmos | ✅ Active |
 | **Warden Protocol** | <img src="https://pbs.twimg.com/profile_images/1904848026742484992/nO3RP237_400x400.jpg" width="24"/> | Cosmos+EVM ⚡ | ✅ Active |
-| **XRPL EVM Sidechain** | <img src="https://raw.githubusercontent.com/cosmos/chain-registry/master/xrplevm/images/xrplevm.png" width="24"/> | Cosmos+EVM ⚡ | ✅ Active |
-| **Zenrock** | <img src="https://raw.githubusercontent.com/cosmos/chain-registry/master/zenrock/images/rock.png" width="24"/> | Cosmos | ✅ Active |
+| **XRPL EVM Sidechain** | <img src="https://pbs.twimg.com/profile_images/1829585852831285259/EAxFe-gB_400x400.png" width="24"/> | Cosmos+EVM ⚡ | ✅ Active |
+| **Zenrock** | <img src="https://pbs.twimg.com/profile_images/1841523650043772928/EeZIYE7B_400x400.jpg" width="24"/> | Cosmos | ✅ Active |
 
 </div>
 
@@ -218,7 +218,7 @@ We welcome contributions! Please read [CONTRIBUTING.md](CONTRIBUTING.md) first.
 | **Osmosis** | <img src="https://s2.coinmarketcap.com/static/img/coins/64x64/12220.png" width="24"/> | Testnet |
 | **Safrochain** | <img src="https://pbs.twimg.com/profile_images/1938593981517955072/vTcJ4t5i_400x400.jpg" width="24"/> | Testnet |
 | **Warden Barra** | <img src="https://pbs.twimg.com/profile_images/1904848026742484992/nO3RP237_400x400.jpg" width="24"/> | Testnet |
-| **Zenrock** | <img src="https://raw.githubusercontent.com/cosmos/chain-registry/master/zenrock/images/rock.png" width="24"/> | Testnet |
+| **Zenrock** | <img src="https://pbs.twimg.com/profile_images/1841523650043772928/EeZIYE7B_400x400.jpg" width="24"/> | Testnet |
 
 </div>
 
