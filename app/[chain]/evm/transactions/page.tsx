@@ -8,7 +8,7 @@ import { ChainData } from '@/types/chain';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getTranslation } from '@/lib/i18n';
 import { fetchChains } from '@/lib/apiCache';
-import { FileText, Activity, Zap, Users } from 'lucide-react';
+import { FileText, Activity, Zap, Users, Copy, Check } from 'lucide-react';
 
 interface EVMTransaction {
   hash: string;
@@ -30,6 +30,13 @@ export default function EVMTransactionsPage() {
   const [transactions, setTransactions] = useState<EVMTransaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [copiedHash, setCopiedHash] = useState<string | null>(null);
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedHash(text);
+    setTimeout(() => setCopiedHash(null), 2000);
+  };
 
   useEffect(() => {
     const cachedChains = sessionStorage.getItem('chains');
@@ -66,13 +73,27 @@ export default function EVMTransactionsPage() {
         setError(null);
         
         const chainName = selectedChain.chain_name.toLowerCase().replace(/\s+/g, '-');
-        const response = await fetch(`https://ssl.winsnip.xyz/api/evm/transactions?chain=${chainName}`);
+        
+        // Try backend first
+        let response = await fetch(
+          `https://ssl.winsnip.xyz/api/evm/transactions?chain=${chainName}`
+        );
+        
+        let data = await response.json();
+        
+        // If backend returns null/empty or error, fallback to local API
+        if (!data.transactions || data.transactions.length === 0 || data.error) {
+          console.log('Backend returned null/error, trying local API...');
+          response = await fetch(
+            `/api/evm/transactions?chain=${chainName}`
+          );
+          data = await response.json();
+        }
         
         if (!response.ok) {
           throw new Error('Failed to fetch EVM transactions');
         }
         
-        const data = await response.json();
         setTransactions(data.transactions || []);
       } catch (err) {
         console.error('Error fetching EVM transactions:', err);
@@ -146,7 +167,7 @@ export default function EVMTransactionsPage() {
                   {transactions.length > 0 
                     ? `${(transactions.reduce((sum, tx) => sum + parseFloat(tx.value), 0) / transactions.length / 1e18).toFixed(4)}`
                     : '-'
-                  } ETH
+                  } {selectedChain?.assets?.[0]?.symbol || 'TOKEN'}
                 </p>
               </div>
 
@@ -208,7 +229,7 @@ export default function EVMTransactionsPage() {
                           To
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                          Value (ETH)
+                          Value ({selectedChain?.assets?.[0]?.symbol || 'TOKEN'})
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                           Gas Used
@@ -225,11 +246,34 @@ export default function EVMTransactionsPage() {
                       ) : (
                         transactions.map((tx) => (
                           <tr key={tx.hash} className="hover:bg-gray-800/50 transition-colors">
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-400 font-mono">
-                              {truncateHash(tx.hash)}
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-mono">
+                              <div className="flex items-center gap-2">
+                                <a 
+                                  href={`/${selectedChain?.chain_name.toLowerCase().replace(/\s+/g, '-')}/evm/transactions/${tx.hash}`}
+                                  className="text-blue-400 hover:text-blue-300 transition-colors"
+                                >
+                                  {truncateHash(tx.hash)}
+                                </a>
+                                <button
+                                  onClick={() => copyToClipboard(tx.hash)}
+                                  className="p-1 hover:bg-gray-700 rounded transition-colors"
+                                  title="Copy hash"
+                                >
+                                  {copiedHash === tx.hash ? (
+                                    <Check className="w-3 h-3 text-green-500" />
+                                  ) : (
+                                    <Copy className="w-3 h-3 text-gray-400" />
+                                  )}
+                                </button>
+                              </div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100">
-                              {tx.blockNumber}
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                              <a 
+                                href={`/${selectedChain?.chain_name.toLowerCase().replace(/\s+/g, '-')}/evm/blocks/${tx.blockNumber}`}
+                                className="text-blue-400 hover:text-blue-300 transition-colors"
+                              >
+                                {tx.blockNumber}
+                              </a>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 font-mono">
                               {truncateHash(tx.from)}

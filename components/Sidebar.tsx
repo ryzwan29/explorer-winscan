@@ -78,7 +78,7 @@ export default function Sidebar({ selectedChain }: SidebarProps) {
     // Add EVM menu if chain has EVM support
     if (hasEvmSupport) {
       items.push({
-        name: 'EVM Explorer',
+        name: 'EVM',
         translationKey: 'menu.evm',
         path: `${chainPath}/evm`,
         icon: <Zap className="w-5 h-5" />,

@@ -28,19 +28,85 @@ function Header({ chains, selectedChain, onSelectChain }: HeaderProps) {
     selectedChain?.chain_name.toLowerCase().replace(/\s+/g, '-') || '',
     [selectedChain]
   );
-  const handleSearch = useCallback((e: React.FormEvent) => {
+  const handleSearch = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!searchQuery.trim() || !selectedChain) return;
+    
     const query = searchQuery.trim();
+    const chainName = selectedChain.chain_name.toLowerCase().replace(/\s+/g, '-');
+    
+    // Check if it's a block number
     if (/^\d+$/.test(query)) {
+      // Try Cosmos block first
+      try {
+        const cosmosRes = await fetch(`https://ssl.winsnip.xyz/api/blocks/${query}?chain=${chainName}`);
+        if (cosmosRes.ok) {
+          const data = await cosmosRes.json();
+          if (data.block) {
+            router.push(`/${chainPath}/blocks/${query}`);
+            setSearchQuery('');
+            return;
+          }
+        }
+      } catch (err) {
+        console.log('Cosmos block not found, trying EVM...');
+      }
+      
+      // Fallback to EVM block if chain has EVM support
+      if (selectedChain.evm_rpc && selectedChain.evm_rpc.length > 0) {
+        router.push(`/${chainPath}/evm/blocks/${query}`);
+        setSearchQuery('');
+        return;
+      }
+      
       router.push(`/${chainPath}/blocks/${query}`);
-    } else if (/^[A-F0-9]{64}$/i.test(query)) {
+    } 
+    // Check if it's a transaction hash
+    else if (/^[A-F0-9]{64}$/i.test(query)) {
+      // Try Cosmos transaction first
+      try {
+        const cosmosRes = await fetch(`https://ssl.winsnip.xyz/api/transactions/${query}?chain=${chainName}`);
+        if (cosmosRes.ok) {
+          const data = await cosmosRes.json();
+          if (data.transaction) {
+            router.push(`/${chainPath}/transactions/${query}`);
+            setSearchQuery('');
+            return;
+          }
+        }
+      } catch (err) {
+        console.log('Cosmos transaction not found, trying EVM...');
+      }
+      
+      // Fallback to EVM transaction if chain has EVM support
+      if (selectedChain.evm_rpc && selectedChain.evm_rpc.length > 0) {
+        router.push(`/${chainPath}/evm/transactions/${query}`);
+        setSearchQuery('');
+        return;
+      }
+      
       router.push(`/${chainPath}/transactions/${query}`);
-    } else if (query.startsWith(selectedChain.addr_prefix)) {
+    } 
+    // Check if it's a Cosmos address
+    else if (selectedChain.bech32_prefix && query.startsWith(selectedChain.bech32_prefix)) {
       router.push(`/${chainPath}/accounts/${query}`);
-    } else {
+    }
+    else if (selectedChain.addr_prefix && query.startsWith(selectedChain.addr_prefix)) {
+      router.push(`/${chainPath}/accounts/${query}`);
+    }
+    // Check if it's an EVM address (0x...)
+    else if (/^0x[a-fA-F0-9]{40}$/.test(query)) {
+      if (selectedChain.evm_rpc && selectedChain.evm_rpc.length > 0) {
+        router.push(`/${chainPath}/evm/address/${query}`);
+      } else {
+        router.push(`/${chainPath}/accounts/${query}`);
+      }
+    }
+    // Default search
+    else {
       router.push(`/${chainPath}/transactions?q=${query}`);
     }
+    
     setSearchQuery('');
   }, [searchQuery, selectedChain, chainPath, router]);
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {

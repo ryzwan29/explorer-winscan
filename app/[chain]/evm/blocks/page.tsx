@@ -65,13 +65,27 @@ export default function EVMBlocksPage() {
         setError(null);
         
         const chainName = selectedChain.chain_name.toLowerCase().replace(/\s+/g, '-');
-        const response = await fetch(`https://ssl.winsnip.xyz/api/evm/blocks?chain=${chainName}`);
+        
+        // Try backend first
+        let response = await fetch(
+          `https://ssl.winsnip.xyz/api/evm/blocks?chain=${chainName}`
+        );
+        
+        let data = await response.json();
+        
+        // If backend returns null/empty or error, fallback to local API
+        if (!data.blocks || data.blocks.length === 0 || data.error) {
+          console.log('Backend returned null/error, trying local API...');
+          response = await fetch(
+            `/api/evm/blocks?chain=${chainName}`
+          );
+          data = await response.json();
+        }
         
         if (!response.ok) {
           throw new Error('Failed to fetch EVM blocks');
         }
         
-        const data = await response.json();
         setBlocks(data.blocks || []);
       } catch (err) {
         console.error('Error fetching EVM blocks:', err);
@@ -220,11 +234,16 @@ export default function EVMBlocksPage() {
                       ) : (
                         blocks.map((block) => (
                           <tr key={block.number} className="hover:bg-gray-800/50 transition-colors">
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-400">
-                              {block.number}
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                              <a 
+                                href={`/${selectedChain?.chain_name.toLowerCase().replace(/\s+/g, '-')}/evm/blocks/${block.number}`}
+                                className="text-blue-400 hover:text-blue-300 transition-colors"
+                              >
+                                {block.number}
+                              </a>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-100 font-mono">
-                              {truncateHash(block.hash)}
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-mono">
+                              <span className="text-gray-400">{truncateHash(block.hash)}</span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                               {formatTimestamp(block.timestamp)}
