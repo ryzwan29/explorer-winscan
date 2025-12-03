@@ -60,7 +60,39 @@
   ],
   "addr_prefix": "shido",
   "bech32_prefix": "shido",
+  "evm_rpc": [
+    {
+      "address": "https://rpc-nodes.shidoscan.com",
+      "provider": "Shido"
+    },
+    {
+      "address": "https://shidochain_mainnet_evm.chain.whenmoonwhenlambo.money",
+      "provider": "🚀 WHEN MOON 🌕 WHEN LAMBO 🔥"
+    },
+    {
+      "address": "https://evm.mavnode.io",
+      "provider": "MavNode"
+    },
+    {
+      "address": "https://evm.kenseishido.com",
+      "provider": "KENSEI"
+    },
+    {
+      "address": "https://shido-mainnet-archive-lb-nw5es9.zeeve.net/USjg7xqUmCZ4wCsqEOOE/rpc",
+      "provider": "Zeeve"
+    },
+    {
+      "address": "https://evm.shidoscan.net",
+      "provider": "Shido"
+    }
+  ],
+  "evm_wss": [
+    {
+      "address": "wss://wss.shidoscan.net",
+      "provider": "Shido"
+    }
+  ],
   "theme_color": "#812cd6",
   "logo": "https://raw.githubusercontent.com/cosmos/chain-registry/master/shido/images/shido.png",
-  "updated": "2025-11-22"
+  "updated": "2025-12-03"
 }

@@ -41,7 +41,7 @@
   ],
   "evm_wss": [
     {
-      "address": "wss://evm-ws.barra.wardenprotocol.org",
+      "address": "https://evm-ws.barra.wardenprotocol.org",
       "provider": "Warden Protocol"
     }
   ],
