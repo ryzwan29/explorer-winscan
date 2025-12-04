@@ -27,6 +27,8 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 import { ChainData } from '@/types/chain';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getTranslation } from '@/lib/i18n';
+import PartnershipWidget from '@/components/PartnershipWidget';
+
 interface SidebarProps {
   selectedChain: ChainData | null;
 }
@@ -326,7 +328,11 @@ export default function Sidebar({ selectedChain }: SidebarProps) {
             );
           })}
         </nav>
-        <div className="hidden md:block p-4 border-t border-gray-800 flex-shrink-0">
+
+        {/* Partnership Widget */}
+        {!collapsed && <PartnershipWidget />}
+
+        <div className="hidden md:block p-4 border-t border-gray-800 flex-shrink-0 mt-auto">
           <button
             onClick={handleCollapse}
             className="w-full p-2 bg-gray-800 rounded-lg hover:bg-gray-700 transition-all duration-200 hover:scale-105 active:scale-95 flex items-center justify-center"
