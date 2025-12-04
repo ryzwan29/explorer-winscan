@@ -10,6 +10,7 @@ import { getTranslation } from '@/lib/i18n';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import WinScanLogo from '@/components/WinScanLogo';
 import Footer from '@/components/Footer';
+import PartnersSection from '@/components/PartnersSection';
 import { fetchChainsWithCache } from '@/lib/chainsCache';
 
 interface GitHubContributor {
@@ -357,6 +358,9 @@ export default function Home() {
                 </div>
               </div>
             </section>
+
+            {/* Partners Section */}
+            <PartnersSection />
 
             {/* Features Section */}
             <section className="container mx-auto px-4 sm:px-6 py-8 sm:py-12 lg:py-16">

@@ -1,0 +1,97 @@
+{
+  "chain_name": "injective-mainnet",
+  "chain_id": "injective-1",
+  "pretty_name": "Injective",
+  "network_type": "mainnet",
+  "bech32_prefix": "inj",
+  "slip44": 60,
+  "fees": {
+    "fee_tokens": [
+      {
+        "denom": "inj",
+        "fixed_min_gas_price": 160000000,
+        "low_gas_price": 500000000,
+        "average_gas_price": 700000000,
+        "high_gas_price": 900000000
+      }
+    ]
+  },
+  "staking": {
+    "staking_tokens": [
+      {
+        "denom": "inj"
+      }
+    ]
+  },
+  "codebase": {
+    "git_repo": "https://github.com/InjectiveLabs/injective-chain-releases",
+    "recommended_version": "v1.13.2",
+    "compatible_versions": ["v1.13.2", "v1.13.1", "v1.13.0"],
+    "cosmos_sdk_version": "0.50.10",
+    "tendermint_version": "0.38.12"
+  },
+  "api": [
+    {
+      "address": "https://injective-api.polkachu.com",
+      "provider": "Polkachu"
+    },
+    {
+      "address": "https://api.injective.nodestake.org",
+      "provider": "NodeStake"
+    },
+    {
+      "address": "https://api-injective.cosmos-spaces.cloud",
+      "provider": "Cosmos Spaces"
+    },
+    {
+      "address": "https://injective-rest.publicnode.com",
+      "provider": "PublicNode"
+    }
+  ],
+  "rpc": [
+    {
+      "address": "https://injective-rpc.polkachu.com",
+      "provider": "Polkachu"
+    },
+    {
+      "address": "https://rpc.injective.nodestake.org",
+      "provider": "NodeStake"
+    },
+    {
+      "address": "https://rpc-injective.cosmos-spaces.cloud",
+      "provider": "Cosmos Spaces"
+    },
+    {
+      "address": "https://injective-rpc.publicnode.com",
+      "provider": "PublicNode"
+    }
+  ],
+  "grpc": [
+    {
+      "address": "injective-grpc.polkachu.com:14390",
+      "provider": "Polkachu"
+    },
+    {
+      "address": "grpc.injective.nodestake.org:443",
+      "provider": "NodeStake"
+    }
+  ],
+  "evm_rpc": [
+    {
+      "address": "https://evm-rpc.injective.network",
+      "provider": "Injective Foundation"
+    }
+  ],
+  "assets": [
+    {
+      "base": "inj",
+      "symbol": "INJ",
+      "display": "INJ",
+      "exponent": "18",
+      "coingecko_id": "injective-protocol",
+      "logo": "https://raw.githubusercontent.com/cosmos/chain-registry/master/injective/images/inj.png"
+    }
+  ],
+  "theme_color": "#00F2FE",
+  "logo": "https://raw.githubusercontent.com/cosmos/chain-registry/master/injective/images/inj.png"
+}
