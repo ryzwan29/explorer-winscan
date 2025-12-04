@@ -34,6 +34,7 @@ export default function EVMTransactionsPage() {
   const [error, setError] = useState<string | null>(null);
   const [copiedHash, setCopiedHash] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Get query from URL
   const urlQuery = searchParams.get('q') || '';
@@ -79,31 +80,35 @@ export default function EVMTransactionsPage() {
   useEffect(() => {
     if (!selectedChain) return;
 
-    const fetchTransactions = async () => {
+    const fetchTransactions = async (showLoading = true) => {
       const chainName = selectedChain.chain_name.toLowerCase().replace(/\s+/g, '-');
       const cacheKey = `evm_txs_${chainName}`;
       
-      // Read from cache first
-      try {
-        const cached = sessionStorage.getItem(cacheKey);
-        if (cached) {
-          const { data, timestamp } = JSON.parse(cached);
-          if (Array.isArray(data) && data.length > 0) {
-            setTransactions(data);
-            // Skip fetch if cache is fresh (< 10 seconds)
-            if (Date.now() - timestamp < 10000) {
-              setLoading(false);
-              return;
+      // Always show cached data immediately (optimistic UI)
+      if (!showLoading) {
+        try {
+          const cached = sessionStorage.getItem(cacheKey);
+          if (cached) {
+            const { data, timestamp } = JSON.parse(cached);
+            if (Array.isArray(data) && data.length > 0) {
+              setTransactions(data);
+              // Skip fetch if cache is very fresh (< 5 seconds)
+              if (Date.now() - timestamp < 5000) {
+                return;
+              }
             }
           }
+        } catch (e) {
+          console.warn('Cache read error:', e);
         }
-      } catch (e) {
-        console.warn('Cache read error:', e);
       }
       
-      // Only show loading if no cached data
-      if (transactions.length === 0) {
+      // Show loading only on initial load
+      if (showLoading && transactions.length === 0) {
         setLoading(true);
+      } else if (!showLoading) {
+        // Silent background refresh
+        setIsRefreshing(true);
       }
       
       try {
@@ -130,7 +135,26 @@ export default function EVMTransactionsPage() {
         }
         
         if (Array.isArray(data.transactions) && data.transactions.length > 0) {
-          setTransactions(data.transactions);
+          // Smooth update: only update if data actually changed
+          setTransactions(prev => {
+            // If initial load or empty, replace all
+            if (prev.length === 0) {
+              return data.transactions;
+            }
+            
+            // Check for new transactions
+            const newTxs = data.transactions.filter(
+              (newTx: EVMTransaction) => !prev.some(tx => tx.hash === newTx.hash)
+            );
+            
+            if (newTxs.length > 0) {
+              // Add new transactions at the beginning, keep max 100
+              return [...newTxs, ...prev].slice(0, 100);
+            }
+            
+            // No changes, return previous state
+            return prev;
+          });
           
           // Save to cache
           try {
@@ -144,19 +168,17 @@ export default function EVMTransactionsPage() {
         }
       } catch (err: any) {
         console.error('Error fetching EVM transactions:', err);
-        // Keep showing cached data if available
-        if (transactions.length === 0) {
-          setError(err instanceof Error ? err.message : 'Failed to load EVM transactions');
-        }
       } finally {
         setLoading(false);
+        setIsRefreshing(false);
       }
     };
 
-    fetchTransactions();
+    // Initial load
+    fetchTransactions(true);
     
-    // Auto-refresh every 12 seconds
-    const interval = setInterval(fetchTransactions, 12000);
+    // Auto-refresh every 6 seconds (silent background refresh)
+    const interval = setInterval(() => fetchTransactions(false), 6000);
     
     return () => clearInterval(interval);
   }, [selectedChain]);
@@ -195,10 +217,13 @@ export default function EVMTransactionsPage() {
                 </p>
               </div>
               
-              <div className="flex items-center gap-2">
-                <div className={`w-2 h-2 rounded-full ${loading ? 'bg-blue-500 animate-pulse' : 'bg-green-500'}`}></div>
-                <span className="text-xs text-gray-400">{loading ? 'Loading' : 'Live'}</span>
-              </div>
+              {/* Realtime indicator - hidden during refresh for smooth UX */}
+              {!isRefreshing && (
+                <div className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${loading ? 'bg-blue-500 animate-pulse' : 'bg-green-500'}`}></div>
+                  <span className="text-xs text-gray-400">{loading ? 'Loading' : 'Live'}</span>
+                </div>
+              )}
             </div>
 
             {/* Stats Cards */}
@@ -269,7 +294,7 @@ export default function EVMTransactionsPage() {
               )}
             </div>
 
-            {loading ? (
+            {loading && transactions.length === 0 ? (
               <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg p-8">
                 <div className="animate-pulse space-y-4">
                   {[...Array(10)].map((_, i) => (

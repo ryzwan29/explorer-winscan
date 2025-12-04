@@ -29,6 +29,7 @@ export default function EVMBlocksPage() {
   const [blocks, setBlocks] = useState<EVMBlock[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     const cachedChains = sessionStorage.getItem('chains');
@@ -59,31 +60,35 @@ export default function EVMBlocksPage() {
   useEffect(() => {
     if (!selectedChain) return;
 
-    const fetchBlocks = async () => {
+    const fetchBlocks = async (showLoading = true) => {
       const chainName = selectedChain.chain_name.toLowerCase().replace(/\s+/g, '-');
       const cacheKey = `evm_blocks_${chainName}`;
       
-      // Read from cache first
-      try {
-        const cached = sessionStorage.getItem(cacheKey);
-        if (cached) {
-          const { data, timestamp } = JSON.parse(cached);
-          if (Array.isArray(data) && data.length > 0) {
-            setBlocks(data);
-            // Skip fetch if cache is fresh (< 10 seconds)
-            if (Date.now() - timestamp < 10000) {
-              setLoading(false);
-              return;
+      // Always show cached data immediately (optimistic UI)
+      if (!showLoading) {
+        try {
+          const cached = sessionStorage.getItem(cacheKey);
+          if (cached) {
+            const { data, timestamp } = JSON.parse(cached);
+            if (Array.isArray(data) && data.length > 0) {
+              setBlocks(data);
+              // Skip fetch if cache is very fresh (< 5 seconds)
+              if (Date.now() - timestamp < 5000) {
+                return;
+              }
             }
           }
+        } catch (e) {
+          console.warn('Cache read error:', e);
         }
-      } catch (e) {
-        console.warn('Cache read error:', e);
       }
       
-      // Only show loading if no cached data
-      if (blocks.length === 0) {
+      // Show loading only on initial load
+      if (showLoading && blocks.length === 0) {
         setLoading(true);
+      } else if (!showLoading) {
+        // Silent background refresh
+        setIsRefreshing(true);
       }
       
       try {
@@ -110,7 +115,26 @@ export default function EVMBlocksPage() {
         }
         
         if (Array.isArray(data.blocks) && data.blocks.length > 0) {
-          setBlocks(data.blocks);
+          // Smooth update: only update if data actually changed
+          setBlocks(prev => {
+            // If initial load or empty, replace all
+            if (prev.length === 0) {
+              return data.blocks;
+            }
+            
+            // Check for new blocks
+            const newBlocks = data.blocks.filter(
+              (newBlock: EVMBlock) => !prev.some(b => b.number === newBlock.number)
+            );
+            
+            if (newBlocks.length > 0) {
+              // Add new blocks at the beginning, keep max 50 blocks
+              return [...newBlocks, ...prev].slice(0, 50);
+            }
+            
+            // No changes, return previous state
+            return prev;
+          });
           
           // Save to cache
           try {
@@ -130,13 +154,15 @@ export default function EVMBlocksPage() {
         }
       } finally {
         setLoading(false);
+        setIsRefreshing(false);
       }
     };
 
-    fetchBlocks();
+    // Initial load
+    fetchBlocks(true);
     
-    // Auto-refresh every 12 seconds
-    const interval = setInterval(fetchBlocks, 12000);
+    // Auto-refresh every 6 seconds (silent background refresh)
+    const interval = setInterval(() => fetchBlocks(false), 6000);
     
     return () => clearInterval(interval);
   }, [selectedChain]);
@@ -175,10 +201,13 @@ export default function EVMBlocksPage() {
                 </p>
               </div>
               
-              <div className="flex items-center gap-2">
-                <div className={`w-2 h-2 rounded-full ${loading ? 'bg-blue-500 animate-pulse' : 'bg-green-500'}`}></div>
-                <span className="text-xs text-gray-400">{loading ? 'Loading' : 'Live'}</span>
-              </div>
+              {/* Realtime indicator - hidden during refresh for smooth UX */}
+              {!isRefreshing && (
+                <div className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${loading ? 'bg-blue-500 animate-pulse' : 'bg-green-500'}`}></div>
+                  <span className="text-xs text-gray-400">{loading ? 'Loading' : 'Live'}</span>
+                </div>
+              )}
             </div>
 
             {/* Stats Cards */}
@@ -230,7 +259,7 @@ export default function EVMBlocksPage() {
               </div>
             </div>
 
-            {loading ? (
+            {loading && blocks.length === 0 ? (
               <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg p-8">
                 <div className="animate-pulse space-y-4">
                   {[...Array(10)].map((_, i) => (
