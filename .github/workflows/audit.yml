@@ -66,6 +66,17 @@ jobs:
           echo "::error::Found ${{ steps.audit.outputs.critical }} critical vulnerabilities!"
           echo "Please run 'npm audit fix' to resolve"
           exit 1
+      
+      - name: 📊 Create vulnerability summary
+        run: |
+          echo "### 🔒 Security Audit Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Severity | Count |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔴 Critical | ${{ steps.audit.outputs.critical }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🟠 High | ${{ steps.audit.outputs.high }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🟡 Moderate | ${{ steps.audit.outputs.moderate }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🟢 Low | ${{ steps.audit.outputs.low }} |" >> $GITHUB_STEP_SUMMARY
 
   codeql:
     name: CodeQL Analysis
