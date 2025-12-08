@@ -45,6 +45,17 @@
 - 📋 **Transaction Icons** - Visual indicators for blocks, transactions
 - 🔐 **Secure** - Server-side API with CORS handling
 
+### 🤖 Telegram Monitor Bot
+- 📢 **Real-Time Notifications** - Instant alerts for validator missed blocks & governance proposals
+- 🗳️ **Governance Alerts** - Auto-notify when new proposals enter voting period
+- 🌐 **Multi-Chain Support** - Monitor 32+ Cosmos SDK chains simultaneously
+- ⚡ **Smart Monitoring** - Configurable thresholds, cooldown periods, anti-spam
+- 📊 **Live Statistics** - Check active proposals, validator uptime, chain status
+- 🔗 **Direct Voting Links** - One-click buttons to vote on WinScan
+- 🚀 **High Performance** - Parallel API requests, backend proxy optimization
+
+**🔗 Try Now:** [@WinScanMonitorBot](https://t.me/WinScanMonitorBot)
+
 ## 🚀 Quick Start
 
 ```bash
@@ -63,6 +74,7 @@ Visit http://localhost:3000
 
 ## 📖 Documentation
 
+- **[Telegram Monitor Bot](telegram-monitor-bot/README.md)** - Real-time validator & governance alerts
 - **[Auto-Compound Bot Guide](autocompound-bot/README.md)** - Setup validator auto-compound bot
 - **[Chain Configuration Guide](CHAIN-GUIDELINES.md)** - Add your blockchain
 - **[Contributing Guide](CONTRIBUTING.md)** - Contribution guidelines
@@ -91,6 +103,36 @@ npm start
 ```
 
 **📚 Full Documentation:** [autocompound-bot/README.md](autocompound-bot/README.md)
+
+## 📢 Telegram Monitor Bot
+
+**Real-time monitoring and alerts for Cosmos validators and governance!**
+
+The Telegram Monitor Bot provides instant notifications for validator performance issues and governance proposals across 32+ Cosmos SDK chains.
+
+**Key Features:**
+- ✅ **Missed Blocks Alerts** - Get notified when validators miss blocks
+- ✅ **Governance Notifications** - Never miss a voting opportunity
+- ✅ **Multi-Chain Support** - Monitor 32+ chains simultaneously
+- ✅ **Smart Thresholds** - Configurable missed blocks limits
+- ✅ **Anti-Spam** - Cooldown periods prevent notification flooding
+- ✅ **Direct Voting** - One-click buttons to vote on WinScan
+- ✅ **Live Statistics** - Check active proposals and validator uptime
+
+**Available Commands:**
+```
+/start       - Start the bot
+/subscribe   - Subscribe to validator/chain alerts
+/list        - View your subscriptions
+/proposals   - Check active governance proposals
+/stats       - View chain statistics
+/unsubscribe - Remove subscriptions
+/help        - Show all commands
+```
+
+**🔗 Start Monitoring:** [@WinScanMonitorBot](https://t.me/WinScanMonitorBot)
+
+**📚 Full Documentation:** [telegram-monitor-bot/README.md](telegram-monitor-bot/README.md)
 
 ## 🔧 Configuration
 
@@ -177,6 +219,7 @@ We welcome contributions! Please read [CONTRIBUTING.md](CONTRIBUTING.md) first.
 ## 📞 Support
 
 - 🌐 Website: [winsnip.xyz](https://winsnip.xyz)
+- 🤖 Telegram Bot: [@WinScanMonitorBot](https://t.me/WinScanMonitorBot)
 - 🐦 Twitter: [@winsnip](https://twitter.com/winsnip)
 - 💬 Telegram: [t.me/winsnip](https://t.me/winsnip)
 - 💻 GitHub: [github.com/winsnip-official](https://github.com/winsnip-official)
