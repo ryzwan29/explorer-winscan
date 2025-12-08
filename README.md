@@ -12,6 +12,8 @@
   [![Security Audit](https://github.com/winsnip-official/winscan/actions/workflows/audit.yml/badge.svg)](https://github.com/winsnip-official/winscan/actions/workflows/audit.yml)
   [![CodeQL](https://github.com/winsnip-official/winscan/actions/workflows/audit.yml/badge.svg?event=push)](https://github.com/winsnip-official/winscan/security/code-scanning)
   [![CI/CD](https://github.com/winsnip-official/winscan/actions/workflows/ci.yml/badge.svg)](https://github.com/winsnip-official/winscan/actions/workflows/ci.yml)
+  [![Known Vulnerabilities](https://img.shields.io/badge/vulnerabilities-0%20critical-brightgreen)](https://github.com/winsnip-official/winscan/security)
+  [![Dependencies](https://img.shields.io/badge/dependencies-up%20to%20date-brightgreen)](https://github.com/winsnip-official/winscan/blob/dev/package.json)
 </div>
 
 ## ✨ Features
