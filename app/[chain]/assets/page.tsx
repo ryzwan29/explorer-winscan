@@ -385,6 +385,7 @@ export default function AssetsPage() {
 
       if (filterType === 'native' && !isNativeAsset(asset)) return false;
       if (filterType === 'tokens' && isNativeAsset(asset)) return false;
+      if (filterType === 'prc20') return false; // Don't include regular assets in PRC20 filter
       
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
@@ -413,6 +414,20 @@ export default function AssetsPage() {
 
   const nativeCount = assets.filter(isNativeAsset).length;
   const tokensCount = assets.length - nativeCount;
+
+  // Filter PRC20 tokens based on search query
+  const filteredPRC20Tokens = prc20Tokens.filter(token => {
+    if (!searchQuery.trim()) return true;
+    
+    const query = searchQuery.toLowerCase();
+    return (
+      token.token_info?.name?.toLowerCase().includes(query) ||
+      token.token_info?.symbol?.toLowerCase().includes(query) ||
+      token.contract_address?.toLowerCase().includes(query) ||
+      token.marketing_info?.project?.toLowerCase().includes(query) ||
+      token.marketing_info?.description?.toLowerCase().includes(query)
+    );
+  });
 
   // Update totalAssets state when assets or prc20Tokens change
   useEffect(() => {
@@ -577,7 +592,7 @@ export default function AssetsPage() {
                   <span className={`ml-2 px-2 py-0.5 rounded-lg text-xs ${
                     filterType === 'prc20' ? 'bg-white/20' : 'bg-gray-700'
                   }`}>
-                    {prc20Tokens.length}
+                    {filteredPRC20Tokens.length}
                   </span>
                 </button>
               )}
@@ -588,9 +603,14 @@ export default function AssetsPage() {
           {((filteredAssets.length > 0 && filterType !== 'prc20') || (filterType === 'all' && showPRC20Support && prc20Tokens.length > 0)) && (
             <>
               {/* Results info */}
-              {searchQuery && (
+              {searchQuery && filterType !== 'all' && (
                 <div className="mb-4 text-sm text-gray-400">
                   {t('assets.showingResults')} {filteredAssets.length} {t('assets.of')} {assets.length} {t('assets.assetsText')}
+                </div>
+              )}
+              {searchQuery && filterType === 'all' && (
+                <div className="mb-4 text-sm text-gray-400">
+                  Showing {filteredAssets.length} asset(s) and {filteredPRC20Tokens.length} PRC20 token(s) matching "{searchQuery}"
                 </div>
               )}
               
@@ -796,7 +816,7 @@ export default function AssetsPage() {
                     })}
                     
                     {/* PRC20 Tokens in "All" tab */}
-                    {filterType === 'all' && showPRC20Support && prc20Tokens.map((token: PRC20Token, idx: number) => {
+                    {filterType === 'all' && showPRC20Support && filteredPRC20Tokens.map((token: PRC20Token, idx: number) => {
                       const logoUrl = token.marketing_info?.logo?.url?.startsWith('ipfs://')
                         ? `https://ipfs.io/ipfs/${token.marketing_info.logo.url.replace('ipfs://', '')}`
                         : token.marketing_info?.logo?.url || '';
@@ -910,8 +930,15 @@ export default function AssetsPage() {
                 <div className="flex justify-center py-12">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
                 </div>
-              ) : prc20Tokens.length > 0 ? (
+              ) : filteredPRC20Tokens.length > 0 ? (
                 <div className="space-y-6">
+                  {/* Search Results Info */}
+                  {searchQuery && (
+                    <div className="text-sm text-gray-400">
+                      Showing {filteredPRC20Tokens.length} of {prc20Tokens.length} PRC20 tokens
+                    </div>
+                  )}
+                  
                   <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg overflow-hidden">
                     <div className="overflow-x-auto">
                       <table className="w-full">
@@ -944,7 +971,7 @@ export default function AssetsPage() {
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-800">
-                          {prc20Tokens.map((token, index) => {
+                          {filteredPRC20Tokens.map((token, index) => {
                             const tokenInfo = token.token_info;
                             const marketingInfo = token.marketing_info;
                             
@@ -1115,7 +1142,11 @@ export default function AssetsPage() {
               ) : (
                 <div className="text-center py-12 bg-[#1a1a1a] border border-gray-800 rounded-lg">
                   <Coins className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                  <p className="text-gray-400">No PRC20 tokens found</p>
+                  <p className="text-gray-400">
+                    {searchQuery 
+                      ? `No PRC20 tokens matching "${searchQuery}"` 
+                      : 'No PRC20 tokens found'}
+                  </p>
                 </div>
               )}
             </>
@@ -1130,7 +1161,7 @@ export default function AssetsPage() {
           )}
 
           {/* Empty State - Filtered */}
-          {assets.length > 0 && filteredAssets.length === 0 && filterType !== 'prc20' && (
+          {assets.length > 0 && filteredAssets.length === 0 && filterType !== 'prc20' && !(filterType === 'all' && showPRC20Support && filteredPRC20Tokens.length > 0) && (
             <div className="text-center py-12 bg-[#1a1a1a] border border-gray-800 rounded-lg">
               <Coins className="w-16 h-16 text-gray-600 mx-auto mb-4" />
               <p className="text-gray-400">
