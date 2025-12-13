@@ -124,35 +124,35 @@ const ValidatorRow = memo(({
 
   return (
     <tr className="border-b border-gray-800 hover:bg-[#1a1a1a] transition-colors duration-150">
-      <td className="px-6 py-4">
-        <div className="flex items-center space-x-2">
-          <span className="text-gray-400 font-medium min-w-[30px]">{rank}</span>
+      <td className="px-2 md:px-6 py-3 md:py-4">
+        <div className="flex items-center space-x-1 md:space-x-2">
+          <span className="text-gray-400 font-medium text-xs md:text-sm min-w-[20px] md:min-w-[30px]">{rank}</span>
         </div>
       </td>
-      <td className="px-6 py-4">
-        <div className="flex items-center space-x-3">
+      <td className="px-3 md:px-6 py-3 md:py-4">
+        <div className="flex items-center space-x-2 md:space-x-3">
           <ValidatorAvatar
             identity={validator.identity}
             moniker={validator.moniker}
             size="md"
           />
-          <div>
+          <div className="min-w-0">
             <Link
               href={`/${chainPath}/validators/${validator.address}`}
-              className="text-white hover:text-blue-400 font-medium transition-colors"
+              className="text-white hover:text-blue-400 text-sm md:text-base font-medium transition-colors truncate block"
             >
               {validator.moniker || t('common.unknown')}
             </Link>
-            <div className="flex items-center gap-2 mt-0.5">
-              <div className="text-sm text-gray-500 font-mono truncate max-w-[200px]">
-                {validator.address?.slice(0, 20)}...
+            <div className="flex items-center gap-1 md:gap-2 mt-0.5">
+              <div className="text-xs md:text-sm text-gray-500 font-mono truncate max-w-[80px] md:max-w-[200px]">
+                {validator.address?.slice(0, 10)}...
               </div>
               <button
                 onClick={(e) => {
                   navigator.clipboard.writeText(validator.address || '');
                   const btn = e.currentTarget as HTMLElement;
                   const originalContent = btn.innerHTML;
-                  btn.innerHTML = '<svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+                  btn.innerHTML = '<svg class="w-3 h-3 md:w-4 md:h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
                   setTimeout(() => {
                     btn.innerHTML = originalContent;
                   }, 1500);
@@ -160,7 +160,7 @@ const ValidatorRow = memo(({
                 className="text-gray-500 hover:text-gray-300 transition-colors"
                 title="Copy validator address"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                 </svg>
               </button>
@@ -168,7 +168,7 @@ const ValidatorRow = memo(({
           </div>
         </div>
       </td>
-      <td className="px-6 py-4">
+      <td className="hidden md:table-cell px-6 py-4">
         <div>
           <div className="text-gray-300 font-medium">
             {formatVotingPower(validator.votingPower || '0')}
@@ -179,7 +179,7 @@ const ValidatorRow = memo(({
           </div>
         </div>
       </td>
-      <td className="px-6 py-4">
+      <td className="hidden xl:table-cell px-6 py-4">
         {(() => {
           // Use real 24h change data from API if available
           if (validator.votingPowerChange24h !== undefined && validator.votingPowerChange24h !== null) {
@@ -235,7 +235,7 @@ const ValidatorRow = memo(({
           );
         })()}
       </td>
-      <td className="px-6 py-4">
+      <td className="hidden lg:table-cell px-6 py-4">
         <div className="flex items-center space-x-3">
           <div className="relative w-12 h-12">
             <svg className="w-12 h-12 transform -rotate-90">
@@ -265,17 +265,17 @@ const ValidatorRow = memo(({
           </div>
         </div>
       </td>
-      <td className="px-6 py-4 text-gray-300">
-        {formatCommission(validator.commission || '0')}
+      <td className="px-2 md:px-6 py-3 md:py-4 text-gray-300">
+        <span className="text-xs md:text-sm">{formatCommission(validator.commission || '0')}</span>
       </td>
-      <td className="px-6 py-4 text-gray-300">
+      <td className="hidden lg:table-cell px-6 py-4 text-gray-300">
         {validator.delegatorsCount !== undefined && validator.delegatorsCount > 0 ? (
           <div className="font-medium">{validator.delegatorsCount.toLocaleString()}</div>
         ) : (
           <div className="text-gray-500">-</div>
         )}
       </td>
-      <td className="px-6 py-4">
+      <td className="hidden xl:table-cell px-6 py-4">
         {validator.jailed ? (
           <div className="flex flex-col gap-1">
             <span className="px-2 py-1 text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/30 rounded">JAILED</span>
@@ -301,8 +301,8 @@ const ValidatorRow = memo(({
           </div>
         )}
       </td>
-      <td className="px-6 py-4">
-        <div className="flex items-center gap-2">
+      <td className="px-2 md:px-6 py-3 md:py-4">
+        <div className="flex items-center gap-1 md:gap-2">
           {validator.jailed && isConnected && validator.address === accountAddress && (
             <button 
               onClick={async (e) => {
@@ -329,13 +329,13 @@ const ValidatorRow = memo(({
                   alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
                 }
               }}
-              className="group relative px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200 whitespace-nowrap bg-red-500 hover:bg-red-600 text-white shadow-md hover:shadow-lg hover:scale-105 active:scale-95 cursor-pointer"
+              className="group relative px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-semibold rounded-lg transition-all duration-200 whitespace-nowrap bg-red-500 hover:bg-red-600 text-white shadow-md hover:shadow-lg hover:scale-105 active:scale-95 cursor-pointer"
             >
-              <span className="relative flex items-center gap-1.5">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <span className="relative flex items-center gap-1 md:gap-1.5">
+                <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
                 </svg>
-                Unjail
+                <span className="hidden sm:inline">Unjail</span>
               </span>
             </button>
           )}
@@ -350,22 +350,23 @@ const ValidatorRow = memo(({
               }
             }}
             disabled={!isConnected}
-            className={`group relative px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200 whitespace-nowrap ${
+            className={`group relative px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-semibold rounded-lg transition-all duration-200 whitespace-nowrap ${
               isConnected 
                 ? 'bg-white hover:bg-gray-100 text-black shadow-md hover:shadow-lg hover:scale-105 active:scale-95 cursor-pointer' 
                 : 'bg-gray-800 text-gray-500 cursor-not-allowed opacity-50'
             }`}
           >
-            <span className="relative flex items-center gap-1.5">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <span className="relative flex items-center gap-1 md:gap-1.5">
+              <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              Manage Stake
+              <span className="hidden sm:inline">Manage</span>
+              <span className="sm:hidden">Stake</span>
             </span>
           </button>
         </div>
       </td>
-      <td className="px-6 py-4">
+      <td className="hidden lg:table-cell px-6 py-4">
         <div className="flex items-center justify-center">
           {(() => {
             // Check if chain supports authz
@@ -991,9 +992,9 @@ export default function ValidatorsTable({ validators, chainName, asset, chain }:
           <table className="w-full">
             <thead className="bg-[#0f0f0f] border-b border-gray-800 sticky top-0 z-10">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase">#</th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Validator</th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase cursor-pointer hover:text-blue-400 transition-colors">
+              <th className="px-2 md:px-6 py-2 md:py-3 text-left text-[10px] md:text-xs font-semibold text-gray-400 uppercase">#</th>
+              <th className="px-3 md:px-6 py-2 md:py-3 text-left text-[10px] md:text-xs font-semibold text-gray-400 uppercase">Validator</th>
+              <th className="hidden md:table-cell px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase cursor-pointer hover:text-blue-400 transition-colors">
                 <div className="flex items-center space-x-1">
                   <span>Voting Power</span>
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1001,10 +1002,10 @@ export default function ValidatorsTable({ validators, chainName, asset, chain }:
                   </svg>
                 </div>
               </th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase">
+              <th className="hidden xl:table-cell px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase">
                 24H CHANGES
               </th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase cursor-pointer hover:text-blue-400 transition-colors">
+              <th className="hidden lg:table-cell px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase cursor-pointer hover:text-blue-400 transition-colors">
                 <div className="flex items-center space-x-1">
                   <span>Cumulative Share</span>
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1012,15 +1013,16 @@ export default function ValidatorsTable({ validators, chainName, asset, chain }:
                   </svg>
                 </div>
               </th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase cursor-pointer hover:text-blue-400 transition-colors">
+              <th className="px-2 md:px-6 py-2 md:py-3 text-left text-[10px] md:text-xs font-semibold text-gray-400 uppercase cursor-pointer hover:text-blue-400 transition-colors">
                 <div className="flex items-center space-x-1">
-                  <span>Comm.</span>
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <span className="hidden sm:inline">Comm.</span>
+                  <span className="sm:hidden">%</span>
+                  <svg className="w-2 h-2 md:w-3 md:h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
                   </svg>
                 </div>
               </th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase cursor-pointer hover:text-blue-400 transition-colors">
+              <th className="hidden lg:table-cell px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase cursor-pointer hover:text-blue-400 transition-colors">
                 <div className="flex items-center space-x-1">
                   <span>Delegators</span>
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1028,7 +1030,7 @@ export default function ValidatorsTable({ validators, chainName, asset, chain }:
                   </svg>
                 </div>
               </th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase cursor-pointer hover:text-blue-400 transition-colors">
+              <th className="hidden xl:table-cell px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase cursor-pointer hover:text-blue-400 transition-colors">
                 <div className="flex items-center space-x-1">
                   <span>Uptime</span>
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1036,8 +1038,8 @@ export default function ValidatorsTable({ validators, chainName, asset, chain }:
                   </svg>
                 </div>
               </th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase">Action</th>
-              <th className="px-6 py-3 text-center text-xs font-semibold text-gray-400 uppercase">Auto-Compound</th>
+              <th className="px-2 md:px-6 py-2 md:py-3 text-left text-[10px] md:text-xs font-semibold text-gray-400 uppercase">Action</th>
+              <th className="hidden lg:table-cell px-6 py-3 text-center text-xs font-semibold text-gray-400 uppercase">Auto-Compound</th>
             </tr>
           </thead>
           <tbody>

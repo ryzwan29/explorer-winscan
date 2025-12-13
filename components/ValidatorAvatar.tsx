@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { getValidatorAvatar } from '@/lib/keybaseUtils';
 import { Users } from 'lucide-react';
 interface ValidatorAvatarProps {
@@ -24,8 +24,32 @@ export default function ValidatorAvatar({
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const avatarRef = useRef<HTMLDivElement>(null);
+  
+  // Intersection Observer for lazy loading
   useEffect(() => {
-    if (!identity) {
+    if (!avatarRef.current) return;
+    
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsVisible(true);
+            observer.disconnect();
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: '50px' }
+    );
+    
+    observer.observe(avatarRef.current);
+    
+    return () => observer.disconnect();
+  }, []);
+  
+  useEffect(() => {
+    if (!identity || !isVisible) {
       setLoading(false);
       return;
     }
@@ -49,7 +73,7 @@ export default function ValidatorAvatar({
     return () => {
       mounted = false;
     };
-  }, [identity]);
+  }, [identity, isVisible]);
   const getInitials = (name?: string) => {
     if (!name || typeof name !== 'string' || name.trim() === '') {
       return 'V';
@@ -90,7 +114,7 @@ export default function ValidatorAvatar({
   };
   if (showMoniker) {
     return (
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3" ref={avatarRef}>
         {renderAvatar()}
         <div className="flex flex-col">
           <span className="font-semibold text-foreground">{moniker || 'Unknown Validator'}</span>
@@ -104,7 +128,7 @@ export default function ValidatorAvatar({
     );
   }
   return (
-    <div className="relative group">
+    <div className="relative group" ref={avatarRef}>
       {renderAvatar()}
       {}
       <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 bg-gray-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">

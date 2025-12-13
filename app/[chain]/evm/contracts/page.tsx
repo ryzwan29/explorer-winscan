@@ -93,8 +93,8 @@ export default function EVMContractsPage() {
 
     fetchContracts();
     
-    // Auto-refresh every 30 seconds
-    const interval = setInterval(fetchContracts, 30000);
+    // Auto-refresh setiap 60 detik
+    const interval = setInterval(fetchContracts, 60000);
     return () => clearInterval(interval);
   }, [selectedChain]);
 

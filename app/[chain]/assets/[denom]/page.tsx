@@ -227,7 +227,7 @@ export default function AssetDetailPage() {
   const displayUnit = asset.metadata?.denom_units.find((u: DenomUnit) => u.denom === asset.metadata?.display);
   const exponent = displayUnit ? displayUnit.exponent : 6;
   const isNative = isNativeAsset(asset.denom);
-  const isPRC20 = asset.holders_type === 'prc20';
+  const isPRC20 = asset?.holders_type === 'prc20';
 
   return (
     <div className="flex min-h-screen bg-[#0a0a0a]">
@@ -240,23 +240,23 @@ export default function AssetDetailPage() {
           onSelectChain={setSelectedChain}
         />
         
-        <main className="p-6 pt-24">
+        <main className="p-4 md:p-6 pt-20 md:pt-24">
           {/* Back Button */}
           <Link 
             href={`/${chainName}/assets`}
-            className="inline-flex items-center space-x-2 text-gray-400 hover:text-white transition-colors mb-6"
+            className="inline-flex items-center space-x-2 text-sm md:text-base text-gray-400 hover:text-white transition-colors mb-4 md:mb-6"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-4 h-4 md:w-5 md:h-5" />
             <span>{t('assetDetail.backToAssets')}</span>
           </Link>
 
           {/* Header */}
-          <div className="mb-6">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-start gap-4 flex-1">
+          <div className="mb-4 md:mb-6">
+            <div className="flex items-start justify-between mb-3 md:mb-4">
+              <div className="flex items-start gap-3 md:gap-4 flex-1">
                 {/* Token Logo */}
                 {tokenLogo && (
-                  <div className="relative w-20 h-20 rounded-full bg-gradient-to-br from-orange-500/10 to-red-500/10 border-2 border-orange-500/30 flex-shrink-0 overflow-hidden">
+                  <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-orange-500/10 to-red-500/10 border-2 border-orange-500/30 flex-shrink-0 overflow-hidden">
                     <Image
                       src={tokenLogo}
                       alt={asset.metadata?.symbol || 'token'}
@@ -275,13 +275,13 @@ export default function AssetDetailPage() {
                   </div>
                 )}
                 
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2 flex-wrap">
-                    <h1 className="text-3xl font-bold text-white">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 md:gap-3 mb-2 flex-wrap">
+                    <h1 className="text-xl md:text-3xl font-bold text-white truncate">
                       {asset.metadata?.name || asset.metadata?.symbol || t('assetDetail.title')}
                     </h1>
                     <span
-                      className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                      className={`px-2 md:px-3 py-0.5 md:py-1 rounded-full text-[10px] md:text-xs font-semibold flex-shrink-0 ${
                         isPRC20
                           ? 'bg-gradient-to-r from-orange-500/10 to-red-500/10 text-orange-400 border border-orange-500/20'
                           : isNative
@@ -293,7 +293,7 @@ export default function AssetDetailPage() {
                     </span>
                   </div>
                   {asset.metadata?.description && (
-                    <p className="text-gray-400 max-w-3xl">
+                    <p className="text-sm md:text-base text-gray-400 max-w-3xl line-clamp-3 md:line-clamp-none">
                       {asset.metadata.description}
                     </p>
                   )}
@@ -304,18 +304,18 @@ export default function AssetDetailPage() {
 
           {/* Price Card (if available) */}
           {asset.price && asset.price.usd > 0 && (
-            <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-xl p-6 mb-6">
-              <div className="flex items-center justify-between">
+            <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-lg md:rounded-xl p-4 md:p-6 mb-4 md:mb-6">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div>
-                  <div className="text-sm text-gray-400 mb-2">{t('assetDetail.currentPrice')}</div>
-                  <div className="text-4xl font-bold text-white mb-2">
+                  <div className="text-xs md:text-sm text-gray-400 mb-1 md:mb-2">{t('assetDetail.currentPrice')}</div>
+                  <div className="text-2xl md:text-4xl font-bold text-white mb-1 md:mb-2">
                     ${asset.price.usd < 0.01 
                       ? asset.price.usd.toFixed(8) 
                       : asset.price.usd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 6 })
                     }
                   </div>
                   {asset.price.usd_24h_change !== 0 && (
-                    <div className={`flex items-center gap-2 text-lg font-bold ${
+                    <div className={`flex items-center gap-1 md:gap-2 text-sm md:text-lg font-bold ${
                       asset.price.usd_24h_change > 0 ? 'text-green-400' : 'text-red-400'
                     }`}>
                       {asset.price.usd_24h_change > 0 ? '↑' : '↓'}
@@ -324,9 +324,9 @@ export default function AssetDetailPage() {
                   )}
                 </div>
                 {asset.price.usd_market_cap > 0 && (
-                  <div className="text-right">
-                    <div className="text-sm text-gray-400 mb-2">{t('assetDetail.marketCap')}</div>
-                    <div className="text-2xl font-bold text-white">
+                  <div className="text-left md:text-right">
+                    <div className="text-xs md:text-sm text-gray-400 mb-1 md:mb-2">{t('assetDetail.marketCap')}</div>
+                    <div className="text-xl md:text-2xl font-bold text-white">
                       ${asset.price.usd_market_cap.toLocaleString('en-US', { maximumFractionDigits: 0 })}
                     </div>
                   </div>
@@ -336,11 +336,11 @@ export default function AssetDetailPage() {
           )}
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-4 md:mb-6">
             {/* Total Supply */}
-            <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg p-6">
-              <div className="text-sm text-gray-400 mb-1">{t('assetDetail.totalSupply')}</div>
-              <div className="text-2xl font-bold text-white">
+            <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg p-3 md:p-6">
+              <div className="text-xs md:text-sm text-gray-400 mb-1">{t('assetDetail.totalSupply')}</div>
+              <div className="text-lg md:text-2xl font-bold text-white truncate">
                 {asset.supply_formatted || formatSupply(asset.supply || '0', exponent)}
               </div>
               {asset.metadata?.symbol && (
@@ -349,88 +349,88 @@ export default function AssetDetailPage() {
             </div>
 
             {/* Holders */}
-            <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg p-6">
-              <div className="text-sm text-gray-400 mb-1">{t('assetDetail.holders')}</div>
-              <div className="text-2xl font-bold text-blue-400">
+            <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg p-3 md:p-6">
+              <div className="text-xs md:text-sm text-gray-400 mb-1">{t('assetDetail.holders')}</div>
+              <div className="text-lg md:text-2xl font-bold text-blue-400">
                 {asset.holders && asset.holders > 0 
                   ? (asset.holders >= 100 ? '100+' : asset.holders.toLocaleString())
                   : '-'
                 }
               </div>
               {asset.holders_type && asset.holders_type !== 'unavailable' && (
-                <div className="text-xs text-gray-500 mt-1">
+                <div className="text-[10px] md:text-xs text-gray-500 mt-1">
                   {asset.holders_type === 'estimated' ? 'Estimated' : asset.holders_type === 'total_accounts' ? t('assetDetail.totalAccounts') : t('assetDetail.estimated')}
                 </div>
               )}
             </div>
 
             {/* Symbol */}
-            <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg p-6">
-              <div className="text-sm text-gray-400 mb-1">{t('assetDetail.symbol')}</div>
-              <div className="text-2xl font-bold text-white">
+            <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg p-3 md:p-6">
+              <div className="text-xs md:text-sm text-gray-400 mb-1">{t('assetDetail.symbol')}</div>
+              <div className="text-lg md:text-2xl font-bold text-white truncate">
                 {asset.metadata?.symbol || '-'}
               </div>
             </div>
 
             {/* Exponent */}
-            <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg p-6">
-              <div className="text-sm text-gray-400 mb-1">{t('assetDetail.decimals')}</div>
-              <div className="text-2xl font-bold text-white">
+            <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg p-3 md:p-6">
+              <div className="text-xs md:text-sm text-gray-400 mb-1">{t('assetDetail.decimals')}</div>
+              <div className="text-lg md:text-2xl font-bold text-white">
                 {exponent}
               </div>
             </div>
           </div>
 
           {/* Asset Information */}
-          <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg overflow-hidden mb-6">
-            <div className="px-6 py-4 border-b border-gray-800">
-              <h2 className="text-xl font-bold text-white">{t('assetDetail.assetInfo')}</h2>
+          <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg overflow-hidden mb-4 md:mb-6">
+            <div className="px-4 md:px-6 py-3 md:py-4 border-b border-gray-800">
+              <h2 className="text-lg md:text-xl font-bold text-white">{t('assetDetail.assetInfo')}</h2>
             </div>
             <div className="divide-y divide-gray-800">
               {/* Base Denom */}
-              <div className="px-6 py-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="text-sm text-gray-400 mb-1">{t('assetDetail.baseDenom')}</div>
-                    <div className="text-sm text-white font-mono break-all">
+              <div className="px-4 md:px-6 py-3 md:py-4">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs md:text-sm text-gray-400 mb-1">{t('assetDetail.baseDenom')}</div>
+                    <div className="text-xs md:text-sm text-white font-mono break-all">
                       {asset.denom}
                     </div>
                   </div>
                   <button
                     onClick={() => copyToClipboard(asset.denom)}
-                    className="ml-4 p-2 text-gray-400 hover:text-white transition-colors"
+                    className="p-1.5 md:p-2 text-gray-400 hover:text-white transition-colors flex-shrink-0"
                     title={t('assetDetail.copyToClipboard')}
                   >
                     {copied ? (
-                      <Check className="w-5 h-5 text-green-500" />
+                      <Check className="w-4 h-4 md:w-5 md:h-5 text-green-500" />
                     ) : (
-                      <Copy className="w-5 h-5" />
+                      <Copy className="w-4 h-4 md:w-5 md:h-5" />
                     )}
                   </button>
                 </div>
               </div>
 
               {/* Display Denom */}
-              <div className="px-6 py-4">
-                <div className="text-sm text-gray-400 mb-1">{t('assetDetail.displayDenom')}</div>
-                <div className="text-sm text-white">
+              <div className="px-4 md:px-6 py-3 md:py-4">
+                <div className="text-xs md:text-sm text-gray-400 mb-1">{t('assetDetail.displayDenom')}</div>
+                <div className="text-xs md:text-sm text-white">
                   {asset.metadata?.display || '-'}
                 </div>
               </div>
 
               {/* Name */}
-              <div className="px-6 py-4">
-                <div className="text-sm text-gray-400 mb-1">{t('assetDetail.name')}</div>
-                <div className="text-sm text-white">
+              <div className="px-4 md:px-6 py-3 md:py-4">
+                <div className="text-xs md:text-sm text-gray-400 mb-1">{t('assetDetail.name')}</div>
+                <div className="text-xs md:text-sm text-white">
                   {asset.metadata?.name || '-'}
                 </div>
               </div>
 
               {/* URI Hash */}
               {asset.metadata?.uri_hash && (
-                <div className="px-6 py-4">
-                  <div className="text-sm text-gray-400 mb-1">{t('assetDetail.uriHash')}</div>
-                  <div className="text-sm text-white font-mono break-all">
+                <div className="px-4 md:px-6 py-3 md:py-4">
+                  <div className="text-xs md:text-sm text-gray-400 mb-1">{t('assetDetail.uriHash')}</div>
+                  <div className="text-xs md:text-sm text-white font-mono break-all">
                     {asset.metadata.uri_hash}
                   </div>
                 </div>
@@ -441,20 +441,20 @@ export default function AssetDetailPage() {
           {/* Denom Units */}
           {asset.metadata?.denom_units && asset.metadata.denom_units.length > 0 && (
             <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg overflow-hidden">
-              <div className="px-6 py-4 border-b border-gray-800">
-                <h2 className="text-xl font-bold text-white">{t('assetDetail.denomUnits')}</h2>
+              <div className="px-4 md:px-6 py-3 md:py-4 border-b border-gray-800">
+                <h2 className="text-lg md:text-xl font-bold text-white">{t('assetDetail.denomUnits')}</h2>
               </div>
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
                 <table className="w-full">
                   <thead className="bg-[#0f0f0f] border-b border-gray-800">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      <th className="px-3 md:px-6 py-2 md:py-3 text-left text-[10px] md:text-xs font-semibold text-gray-400 uppercase tracking-wider">
                         {t('assetDetail.denom')}
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      <th className="px-3 md:px-6 py-2 md:py-3 text-left text-[10px] md:text-xs font-semibold text-gray-400 uppercase tracking-wider">
                         {t('assetDetail.exponent')}
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      <th className="hidden md:table-cell px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
                         {t('assetDetail.aliases')}
                       </th>
                     </tr>
@@ -462,13 +462,13 @@ export default function AssetDetailPage() {
                   <tbody className="divide-y divide-gray-800">
                     {asset.metadata.denom_units.map((unit, index) => (
                       <tr key={index} className="hover:bg-[#0f0f0f] transition-colors">
-                        <td className="px-6 py-4 text-sm text-white font-mono">
+                        <td className="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm text-white font-mono">
                           {unit.denom}
                         </td>
-                        <td className="px-6 py-4 text-sm text-white">
+                        <td className="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm text-white">
                           {unit.exponent}
                         </td>
-                        <td className="px-6 py-4 text-sm text-gray-400">
+                        <td className="hidden md:table-cell px-6 py-4 text-sm text-gray-400">
                           {unit.aliases && unit.aliases.length > 0 
                             ? unit.aliases.join(', ') 
                             : '-'}

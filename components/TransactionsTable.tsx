@@ -47,12 +47,12 @@ export default function TransactionsTable({
         <table className="w-full">
           <thead className="bg-[#0f0f0f] border-b border-gray-800">
             <tr>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-400">{t('transactions.hash')}</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-400">{t('transactions.type')}</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-400">{t('transactions.result')}</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-400">{t('transactions.height')}</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-400">{t('transactions.fee')}</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-400">{t('transactions.time')}</th>
+              <th className="px-2 md:px-6 py-2 md:py-4 text-left text-[10px] md:text-sm font-semibold text-gray-400">{t('transactions.hash')}</th>
+              <th className="hidden md:table-cell px-6 py-4 text-left text-sm font-semibold text-gray-400">{t('transactions.type')}</th>
+              <th className="px-2 md:px-6 py-2 md:py-4 text-left text-[10px] md:text-sm font-semibold text-gray-400">{t('transactions.result')}</th>
+              <th className="hidden lg:table-cell px-6 py-4 text-left text-sm font-semibold text-gray-400">{t('transactions.height')}</th>
+              <th className="hidden lg:table-cell px-6 py-4 text-left text-sm font-semibold text-gray-400">{t('transactions.fee')}</th>
+              <th className="px-2 md:px-6 py-2 md:py-4 text-left text-[10px] md:text-sm font-semibold text-gray-400">{t('transactions.time')}</th>
             </tr>
           </thead>
           <tbody>
@@ -68,14 +68,14 @@ export default function TransactionsTable({
                   key={tx.hash} 
                   className="border-b border-gray-800 hover:bg-[#0f0f0f] transition-colors"
                 >
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <Activity className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                  <td className="px-2 md:px-6 py-3 md:py-4">
+                    <div className="flex items-center gap-1 md:gap-2">
+                      <Activity className="w-3 h-3 md:w-4 md:h-4 text-blue-400 flex-shrink-0" />
                       <Link 
                         href={`/${chainPath}/transactions/${tx.hash}`}
-                        className="text-blue-500 hover:text-blue-400 font-mono text-sm"
+                        className="text-blue-500 hover:text-blue-400 font-mono text-[10px] md:text-sm"
                       >
-                        {tx.hash.slice(0, 8)}...{tx.hash.slice(-8)}
+                        {tx.hash.slice(0, 6)}...{tx.hash.slice(-6)}
                       </Link>
                       <button
                         onClick={() => copyToClipboard(tx.hash)}
@@ -83,34 +83,40 @@ export default function TransactionsTable({
                         title="Copy hash"
                       >
                         {copiedHash === tx.hash ? (
-                          <Check className="w-4 h-4 text-green-400" />
+                          <Check className="w-3 h-3 md:w-4 md:h-4 text-green-400" />
                         ) : (
-                          <Copy className="w-4 h-4" />
+                          <Copy className="w-3 h-3 md:w-4 md:h-4" />
                         )}
                       </button>
                     </div>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="hidden md:table-cell px-6 py-4">
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-500">
                       {getTypeShortName(tx.type)}
                     </span>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-2 md:px-6 py-3 md:py-4">
                     <div className="flex items-center">
                       {tx.result === 'Success' ? (
                         <>
-                          <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
-                          <span className="text-green-500 text-sm font-medium">Success</span>
+                          <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-green-500 mr-1 md:mr-2" />
+                          <span className="text-green-500 text-[10px] md:text-sm font-medium">
+                            <span className="hidden sm:inline">Success</span>
+                            <span className="sm:hidden">✓</span>
+                          </span>
                         </>
                       ) : (
                         <>
-                          <XCircle className="w-4 h-4 text-red-500 mr-2" />
-                          <span className="text-red-500 text-sm font-medium">Failed</span>
+                          <XCircle className="w-3 h-3 md:w-4 md:h-4 text-red-500 mr-1 md:mr-2" />
+                          <span className="text-red-500 text-[10px] md:text-sm font-medium">
+                            <span className="hidden sm:inline">Failed</span>
+                            <span className="sm:hidden">✗</span>
+                          </span>
                         </>
                       )}
                     </div>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="hidden lg:table-cell px-6 py-4">
                     <Link 
                       href={`/${chainPath}/blocks/${tx.height}`}
                       className="text-blue-500 hover:text-blue-400 font-mono text-sm"
@@ -118,13 +124,13 @@ export default function TransactionsTable({
                       {tx.height}
                     </Link>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="hidden lg:table-cell px-6 py-4">
                     <span className="text-gray-300 text-sm">
                       {formatFee(tx.fee)}
                     </span>
                   </td>
-                  <td className="px-6 py-4">
-                    <span className="text-gray-400 text-sm">
+                  <td className="px-2 md:px-6 py-3 md:py-4">
+                    <span className="text-gray-400 text-[10px] md:text-sm">
                       {formatDistanceToNow(new Date(tx.time), { addSuffix: true })}
                     </span>
                   </td>

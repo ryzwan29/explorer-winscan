@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback, useMemo, memo } from 'react';
+import { useEffect, useState, useCallback, useMemo, memo, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
@@ -181,6 +181,12 @@ export default function ValidatorDetailPage() {
 
   const fetchValidatorData = useCallback(async (showLoading = true) => {
     if (!selectedChain || !params?.address) return;
+    
+    // Prevent multiple simultaneous fetches
+    if (isRefreshing) {
+      console.log('[Validator Detail] Already fetching, skipping duplicate request');
+      return;
+    }
     
     const validatorCacheKey = getCacheKey('validator', selectedChain.chain_name, params.address as string);
     const cachedValidator = getStaleCache<ValidatorDetail>(validatorCacheKey);
@@ -389,9 +395,27 @@ export default function ValidatorDetailPage() {
 
         if (uptimeRes?.ok) {
           const uptimeData = await uptimeRes.json();
+          console.log('[Validator Detail] Raw uptime data:', JSON.stringify(uptimeData).substring(0, 500));
+          
           if (uptimeData.blocks && Array.isArray(uptimeData.blocks)) {
             setUptimeBlocks(uptimeData.blocks);
-            setUptimePercentage(uptimeData.uptime || 0);
+            
+            // Debug: check first few blocks structure
+            console.log('[Validator Detail] First 3 blocks:', uptimeData.blocks.slice(0, 3));
+            
+            // Recalculate uptime dari blocks array (sama seperti uptime page)
+            const totalBlocks = uptimeData.blocks.length;
+            // Handle both boolean and truthy values for signed property
+            const signedCount = uptimeData.blocks.filter((block: any) => {
+              // Check if signed is true (boolean) or any truthy value
+              return block.signed === true || block.signed === 1 || block.signed === '1' || block.signed;
+            }).length;
+            const calculatedUptime = totalBlocks > 0 ? (signedCount / totalBlocks) * 100 : 0;
+            
+            setUptimePercentage(calculatedUptime);
+            console.log(`[Validator Detail Chart] Uptime: ${signedCount}/${totalBlocks} = ${calculatedUptime.toFixed(2)}%`);
+          } else {
+            console.log('[Validator Detail] No blocks array found in uptime data');
           }
         }
       }
@@ -405,9 +429,22 @@ export default function ValidatorDetailPage() {
     }
   }, [selectedChain, params]);
 
+  // Fetch validator data once on mount or when chain/address changes
+  // Use a ref to track if we've already fetched for this chain+address combo
+  const lastFetchRef = useRef<string>('');
+  
   useEffect(() => {
+    if (!selectedChain?.chain_name || !params?.address) return;
+    
+    const fetchKey = `${selectedChain.chain_name}-${params.address}`;
+    if (lastFetchRef.current === fetchKey) {
+      console.log('[Validator Detail] Already fetched for this validator, skipping');
+      return;
+    }
+    
+    lastFetchRef.current = fetchKey;
     fetchValidatorData(true);
-  }, [fetchValidatorData]);
+  }, [selectedChain?.chain_name, params?.address]);
 
   // Auto-update disabled - only fetch on initial load
   // useEffect(() => {
@@ -420,33 +457,12 @@ export default function ValidatorDetailPage() {
   //   return () => clearInterval(interval);
   // }, [selectedChain, params, fetchValidatorData]);
 
-  useEffect(() => {
-    if (!selectedChain || !validator?.hexAddress) return;
-
-    const fetchUptimeRealtime = async () => {
-      try {
-        const uptimeRes = await fetchApi(
-          `/api/uptime/validator?chain=${selectedChain.chain_name}&address=${params.address}&blocks=100`
-        );
-
-        if (uptimeRes.ok) {
-          const uptimeData = await uptimeRes.json();
-          if (uptimeData.blocks && Array.isArray(uptimeData.blocks)) {
-            setUptimeBlocks(uptimeData.blocks);
-            setUptimePercentage(uptimeData.uptime || 0);
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching uptime:', error);
-      }
-    };
-
-    fetchUptimeRealtime();
-    // Auto-update disabled - only fetch once on initial load
-    // const uptimeInterval = setInterval(fetchUptimeRealtime, 6000);
-
-    // return () => clearInterval(uptimeInterval);
-  }, [selectedChain, validator?.hexAddress, params.address]);
+  // REMOVED: Duplicate uptime fetch - already handled in fetchValidatorData()
+  // This was causing infinite loop because validator state changes triggered re-fetch
+  // Uptime is now fetched in 2 places within fetchValidatorData():
+  // 1. blocks=150 for chart visualization 
+  // 2. blocks=100 for uptime card (if needed separately)
+  // Both now recalculate from blocks array instead of using backend cached value
 
   // Fetch validators list for redelegate
   useEffect(() => {

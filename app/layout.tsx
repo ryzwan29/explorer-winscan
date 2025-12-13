@@ -53,7 +53,19 @@ export default function RootLayout({
           __html: `
             if ('serviceWorker' in navigator) {
               window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/sw.js');
+                navigator.serviceWorker.register('/sw.js', {
+                  updateViaCache: 'none',
+                  scope: '/'
+                }).then(function(registration) {
+                  console.log('[PWA] Service Worker registered');
+                  
+                  // Check for updates setiap 1 jam, tidak agresif
+                  setInterval(function() {
+                    registration.update();
+                  }, 60 * 60 * 1000);
+                }).catch(function(error) {
+                  console.log('[PWA] Service Worker registration failed:', error);
+                });
               });
             }
           `

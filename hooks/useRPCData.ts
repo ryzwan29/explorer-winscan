@@ -67,7 +67,7 @@ export function useValidators(rpcUrls: string[], status: string = 'BOND_STATUS_B
     rpcUrls,
     `/cosmos/staking/v1beta1/validators?status=${status}&pagination.limit=1000`,
     `validators_${status}`,
-    { cacheTime: 30, refetchInterval: 30000 }
+    { cacheTime: 60, refetchInterval: 60000 } // 1 menit (sebelum: 30 detik)
   );
 }
 
@@ -76,7 +76,7 @@ export function useValidator(rpcUrls: string[], address: string) {
     rpcUrls,
     `/cosmos/staking/v1beta1/validators/${address}`,
     `validator_${address}`,
-    { cacheTime: 30, refetchInterval: 30000 }
+    { cacheTime: 60, refetchInterval: 60000 } // 1 menit (sebelum: 30 detik)
   );
 }
 
@@ -85,6 +85,6 @@ export function useLatestBlock(rpcUrls: string[]) {
     rpcUrls,
     `/cosmos/base/tendermint/v1beta1/blocks/latest`,
     'latest_block',
-    { cacheTime: 6, refetchInterval: 6000 }
+    { cacheTime: 10, refetchInterval: 10000 } // 10 detik (sebelum: 6 detik)
   );
 }

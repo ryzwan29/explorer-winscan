@@ -485,7 +485,8 @@ export default function ChainOverviewPage() {
       }
     };
 
-    const interval = setInterval(refreshData, 10000);
+    // Auto-refresh setiap 30 detik (tidak terlalu agresif)
+    const interval = setInterval(refreshData, 30000);
     return () => clearInterval(interval);
   }, [selectedChain]);
 
@@ -499,7 +500,7 @@ export default function ChainOverviewPage() {
       <div className="flex-1 flex flex-col">
         <Header chains={chains} selectedChain={selectedChain} onSelectChain={setSelectedChain} />
 
-        <main className="flex-1 mt-16 p-4 md:p-6 overflow-auto">
+        <main className="flex-1 mt-32 lg:mt-16 p-4 md:p-6 overflow-auto">
           {/* Premium Chain Header Banner */}
           <div className="mb-6">
             {chainRegistry && (chainRegistry.website || chainRegistry.description || chainRegistry.codebase?.git_repo || chainRegistry.twitter) ? (

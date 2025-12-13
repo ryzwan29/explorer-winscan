@@ -19,19 +19,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       c.chain_name.toLowerCase().replace(/\s+/g, "-") === chain.toLowerCase()
   );
 
+  if (!selected) {
+    return {
+      title: "Chain Not Found — WinScan",
+      description: "Explore blockchain data with WinScan",
+    };
+  }
+
   const chain_name = selected.chain_name
     .split("-")
     .map(
       (content: string) => content.charAt(0).toUpperCase() + content.slice(1)
     )
     .join(" ");
-  const title = selected
-    ? `${chain_name} Explorer — WinScan`
-    : "Chain Overview - WinScan";
+  const title = `${chain_name} Explorer — WinScan`;
 
   const description = `Winscan allows you to explore and search the ${chain_name} blockchain for transactions, addresses, tokens, prices and other activities taking place on ${chain_name}`;
 
-  const image = selected?.logo ?? "/logo.svg";
+  const image = selected.logo ?? "/logo.svg";
 
   return {
     title,

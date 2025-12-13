@@ -36,11 +36,11 @@ export default function BlocksTable({ blocks, chainName, currentPage, onPageChan
         <table className="w-full">
           <thead className="bg-[#0f0f0f] border-b border-gray-800">
             <tr>
-              <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">{t('blocks.height')}</th>
-              <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">{t('blocks.proposer')}</th>
-              <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">{t('blocks.hash')}</th>
-              <th className="px-6 py-4 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">{t('blocks.txCount')}</th>
-              <th className="px-6 py-4 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">{t('blocks.time')}</th>
+              <th className="px-2 md:px-6 py-2 md:py-4 text-left text-[10px] md:text-xs font-medium text-gray-400 uppercase tracking-wider">{t('blocks.height')}</th>
+              <th className="px-2 md:px-6 py-2 md:py-4 text-left text-[10px] md:text-xs font-medium text-gray-400 uppercase tracking-wider">{t('blocks.proposer')}</th>
+              <th className="hidden lg:table-cell px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">{t('blocks.hash')}</th>
+              <th className="px-2 md:px-6 py-2 md:py-4 text-center text-[10px] md:text-xs font-medium text-gray-400 uppercase tracking-wider">{t('blocks.txCount')}</th>
+              <th className="px-2 md:px-6 py-2 md:py-4 text-right text-[10px] md:text-xs font-medium text-gray-400 uppercase tracking-wider">{t('blocks.time')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-800">{blocks.length === 0 ? (
@@ -62,49 +62,49 @@ export default function BlocksTable({ blocks, chainName, currentPage, onPageChan
                       : ''
                   }`}
                 >
-                  <td className="px-6 py-4">
+                  <td className="px-2 md:px-6 py-3 md:py-4">
                     <Link 
                       href={`/${chainPath}/blocks/${block.height}`}
-                      className="flex items-center gap-2 text-blue-400 hover:text-blue-300 font-mono font-medium transition-colors"
+                      className="flex items-center gap-1 md:gap-2 text-blue-400 hover:text-blue-300 font-mono text-xs md:text-sm font-medium transition-colors"
                     >
-                      <Box className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                      <Box className="w-3 h-3 md:w-4 md:h-4 text-blue-400 flex-shrink-0" />
                       {block.height.toLocaleString()}
                     </Link>
                   </td>
-                  <td className="px-6 py-4">{block.validator ? (
+                  <td className="px-2 md:px-6 py-3 md:py-4">{block.validator ? (
                       <Link 
                         href={`/${chainPath}/validators/${block.validator.address}`}
-                        className="flex items-center gap-2.5 group max-w-xs"
+                        className="flex items-center gap-1 md:gap-2.5 group max-w-[100px] md:max-w-xs"
                       >
                         <ValidatorAvatar 
                           identity={block.validator.identity}
                           moniker={block.validator.moniker}
                           size="sm"
                         />
-                        <span className="text-white group-hover:text-blue-400 font-normal text-sm transition-colors truncate">
+                        <span className="text-white group-hover:text-blue-400 font-normal text-xs md:text-sm transition-colors truncate">
                           {block.validator.moniker}
                         </span>
                       </Link>
                     ) : (
-                      <span className="text-gray-500 font-mono text-xs">
-                        {block.proposer.slice(0, 12)}...{block.proposer.slice(-8)}
+                      <span className="text-gray-500 font-mono text-[10px] md:text-xs truncate block max-w-[80px] md:max-w-none">
+                        {block.proposer.slice(0, 8)}...{block.proposer.slice(-6)}
                       </span>
                     )}
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="hidden lg:table-cell px-6 py-4">
                     <span className="text-gray-400 font-mono text-xs">
                       {block.hash.slice(0, 20)}...{block.hash.slice(-12)}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-center">
-                    <span className={`inline-flex items-center justify-center px-2.5 py-0.5 rounded text-xs font-medium ${
+                  <td className="px-2 md:px-6 py-3 md:py-4 text-center">
+                    <span className={`inline-flex items-center justify-center px-1.5 md:px-2.5 py-0.5 rounded text-[10px] md:text-xs font-medium ${
                       block.txs > 0 ? 'text-green-400' : 'text-gray-500'
                     }`}>
                       {block.txs}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-right">
-                    <span className="text-gray-400 text-sm">
+                  <td className="px-2 md:px-6 py-3 md:py-4 text-right">
+                    <span className="text-gray-400 text-[10px] md:text-sm">
                       {formatDistanceToNow(new Date(block.time), { addSuffix: true })}
                     </span>
                   </td>

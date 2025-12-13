@@ -1,35 +1,38 @@
-const CACHE_NAME = 'winscan-v3';
-const STATIC_CACHE = 'winscan-static-v3';
-const DYNAMIC_CACHE = 'winscan-dynamic-v3';
+const CACHE_NAME = 'winscan-v4';
+const STATIC_CACHE = 'winscan-static-v4';
+const DYNAMIC_CACHE = 'winscan-dynamic-v4';
 
 const urlsToCache = [
-  '/',
   '/manifest.json',
   '/icon-192x192.png',
   '/icon-512x512.png'
 ];
 
-// Cache duration (in milliseconds)
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes for dynamic content
+// Cache duration - lebih lama untuk mengurangi agresivitas
+const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes for dynamic content
+const API_CACHE_DURATION = 10 * 1000; // 10 seconds for API calls (real-time data)
 
-// Install service worker
+// Install service worker - tidak paksa skipWaiting
 self.addEventListener('install', (event) => {
-  self.skipWaiting(); // Force immediate activation
+  console.log('[SW] Installing service worker...');
   event.waitUntil(
     caches.open(STATIC_CACHE)
       .then((cache) => cache.addAll(urlsToCache))
+      .then(() => console.log('[SW] Static assets cached'))
   );
 });
 
 // Check if cached response is still fresh
-function isCacheFresh(response) {
+function isCacheFresh(response, isApiCall = false) {
   if (!response) return false;
   
   const cachedTime = response.headers.get('sw-cache-time');
   if (!cachedTime) return false;
   
   const age = Date.now() - parseInt(cachedTime);
-  return age < CACHE_DURATION;
+  const maxAge = isApiCall ? API_CACHE_DURATION : CACHE_DURATION;
+  
+  return age < maxAge;
 }
 
 // Add timestamp to response
@@ -49,34 +52,67 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
   
-  // Network First with Stale-While-Revalidate for API calls and dynamic pages
-  if (url.pathname.startsWith('/api/') || 
-      url.pathname.match(/^\/[a-z]+-(?:mainnet|test)(?:\/|$)/) ||
+  // Skip caching for external domains
+  if (url.origin !== self.location.origin) {
+    event.respondWith(fetch(request));
+    return;
+  }
+  
+  // Network First for API calls - cache hanya sebagai fallback offline
+  if (url.pathname.startsWith('/api/')) {
+    event.respondWith(
+      fetch(request)
+        .then((networkResponse) => {
+          // Simpan ke cache untuk offline fallback
+          const responseToCache = addCacheTimestamp(networkResponse.clone());
+          caches.open(DYNAMIC_CACHE).then((cache) => {
+            cache.put(request, responseToCache);
+          });
+          return networkResponse;
+        })
+        .catch(() => {
+          // Fallback ke cache hanya jika offline
+          return caches.match(request).then((cachedResponse) => {
+            if (cachedResponse) {
+              console.log('[SW] Serving cached API response (offline)');
+              return cachedResponse;
+            }
+            return new Response(JSON.stringify({ error: 'Offline' }), {
+              status: 503,
+              headers: { 'Content-Type': 'application/json' }
+            });
+          });
+        })
+    );
+    return;
+  }
+  
+  // Stale-While-Revalidate untuk dynamic pages - tidak agresif
+  if (url.pathname.match(/^\/[a-z]+-(?:mainnet|test)(?:\/|$)/) ||
       url.pathname.includes('/validators/') ||
       url.pathname.includes('/transactions/') ||
       url.pathname.includes('/blocks/')) {
     
     event.respondWith(
-      caches.open(DYNAMIC_CACHE).then((cache) => {
-        return cache.match(request).then((cachedResponse) => {
-          const fetchPromise = fetch(request)
-            .then((networkResponse) => {
-              // Clone and cache the response with timestamp
-              const responseToCache = addCacheTimestamp(networkResponse.clone());
+      caches.match(request).then((cachedResponse) => {
+        const fetchPromise = fetch(request)
+          .then((networkResponse) => {
+            // Update cache in background
+            const responseToCache = addCacheTimestamp(networkResponse.clone());
+            caches.open(DYNAMIC_CACHE).then((cache) => {
               cache.put(request, responseToCache);
-              return networkResponse;
-            })
-            .catch(() => cachedResponse); // Fallback to cache if network fails
-          
-          // If cache is fresh, return it immediately and update in background
-          if (cachedResponse && isCacheFresh(cachedResponse)) {
-            fetchPromise.catch(() => {}); // Update cache in background
-            return cachedResponse;
-          }
-          
-          // Otherwise, wait for network
-          return fetchPromise;
-        });
+            });
+            return networkResponse;
+          })
+          .catch(() => cachedResponse);
+        
+        // Return cache immediately if available, update in background
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+        
+        // Otherwise wait for network
+        return fetchPromise;
       })
     );
     return;
@@ -104,41 +140,43 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Activate and clean old caches
+// Activate and clean old caches - tidak agresif claim
 self.addEventListener('activate', (event) => {
+  console.log('[SW] Activating service worker...');
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME && cacheName !== STATIC_CACHE && cacheName !== DYNAMIC_CACHE) {
-            console.log('Deleting old cache:', cacheName);
+            console.log('[SW] Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
     }).then(() => {
-      console.log('Service worker activated and claimed clients');
-      return self.clients.claim(); // Take control immediately
+      console.log('[SW] Service worker activated');
+      // Tidak langsung claim - biarkan user refresh manual
     })
   );
 });
 
 // Handle messages from clients
 self.addEventListener('message', (event) => {
+  // Only skip waiting if explicitly requested
   if (event.data && event.data.type === 'SKIP_WAITING') {
+    console.log('[SW] Skip waiting requested');
     self.skipWaiting();
   }
   
   // Clear cache on demand
   if (event.data && event.data.type === 'CLEAR_CACHE') {
+    console.log('[SW] Clearing cache...');
     event.waitUntil(
       caches.keys().then((cacheNames) => {
         return Promise.all(
           cacheNames.map((cacheName) => {
-            if (cacheName === DYNAMIC_CACHE) {
-              console.log('Clearing dynamic cache');
-              return caches.delete(cacheName);
-            }
+            console.log('[SW] Clearing cache:', cacheName);
+            return caches.delete(cacheName);
           })
         );
       })
