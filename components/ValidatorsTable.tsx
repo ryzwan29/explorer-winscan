@@ -142,7 +142,7 @@ const ValidatorRow = memo(({
             </div>
             <Link
               href={`/${chainPath}/validators/${validator.address}`}
-              className="text-white hover:text-blue-400 text-[11px] font-medium transition-colors truncate flex items-center h-8"
+              className="text-white hover:text-blue-400 text-[9px] font-medium transition-colors truncate flex items-center h-8"
             >
               {validator.moniker || t('common.unknown')}
             </Link>
