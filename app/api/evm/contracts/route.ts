@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { fetchWithFallback } from '@/lib/apiFallback';
 
 export const runtime = 'edge';
 
@@ -27,13 +28,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Fetch from external API
-    const apiUrl = `https://ssl.winsnip.xyz/api/evm/contracts?chain=${chain}&page=${page}&limit=${limit}`;
-    const response = await fetch(apiUrl, {
-      headers: {
-        'Accept': 'application/json',
-      },
-      next: { revalidate: 60 }, // Cache for 60 seconds
+    // Fetch with automatic fallback
+    const response = await fetchWithFallback({
+      path: '/api/evm/contracts',
+      params: { chain, page, limit },
+      revalidate: 60,
     });
 
     if (!response.ok) {
