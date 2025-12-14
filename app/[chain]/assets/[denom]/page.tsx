@@ -389,16 +389,18 @@ export default function AssetDetailPage() {
             <div className="divide-y divide-gray-800">
               {/* Base Denom */}
               <div className="px-4 md:px-6 py-3 md:py-4">
-                <div className="flex items-start justify-between gap-2">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
                   <div className="flex-1 min-w-0">
-                    <div className="text-xs md:text-sm text-gray-400 mb-1">{t('assetDetail.baseDenom')}</div>
-                    <div className="text-xs md:text-sm text-white font-mono break-all">
+                    <div className="text-xs md:text-sm text-gray-400 mb-1">
+                      {isPRC20 ? 'Contract Address' : t('assetDetail.baseDenom')}
+                    </div>
+                    <div className="text-xs md:text-sm text-white font-mono break-all overflow-hidden">
                       {asset.denom}
                     </div>
                   </div>
                   <button
                     onClick={() => copyToClipboard(asset.denom)}
-                    className="p-1.5 md:p-2 text-gray-400 hover:text-white transition-colors flex-shrink-0"
+                    className="p-1.5 md:p-2 text-gray-400 hover:text-white transition-colors flex-shrink-0 self-start"
                     title={t('assetDetail.copyToClipboard')}
                   >
                     {copied ? (
@@ -482,24 +484,24 @@ export default function AssetDetailPage() {
           )}
 
           {/* Top Holders Section */}
-          <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-800 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-white">Top Holders</h2>
+          <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg overflow-hidden mt-4 md:mt-6">
+            <div className="px-4 md:px-6 py-3 md:py-4 border-b border-gray-800 flex items-center justify-between">
+              <h2 className="text-lg md:text-xl font-bold text-white">Top Holders</h2>
               <Link
                 href={`/${chainName}/assets/${encodeURIComponent(denom)}/holders`}
-                className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
+                className="text-xs md:text-sm text-blue-400 hover:text-blue-300 transition-colors"
               >
                 View All →
               </Link>
             </div>
-            <div className="p-6">
-              <div className="text-center py-8 text-gray-400">
-                <p className="mb-4">View detailed holder information</p>
+            <div className="p-4 md:p-6">
+              <div className="text-center py-6 md:py-8 text-gray-400">
+                <p className="mb-3 md:mb-4 text-sm md:text-base">View detailed holder information</p>
                 <Link
                   href={`/${chainName}/assets/${encodeURIComponent(denom)}/holders`}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
+                  className="inline-flex items-center gap-2 px-3 md:px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors text-sm md:text-base"
                 >
-                  <TrendingUp className="w-4 h-4" />
+                  <TrendingUp className="w-3 h-3 md:w-4 md:h-4" />
                   <span>View Holders</span>
                 </Link>
               </div>

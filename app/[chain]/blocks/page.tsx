@@ -162,18 +162,18 @@ export default function BlocksPage() {
           onSelectChain={setSelectedChain}
         />
 
-        <main className="flex-1 mt-16 p-6 overflow-auto">
-          <div className="mb-6 flex items-center justify-between">
+        <main className="flex-1 mt-24 md:mt-16 p-3 md:p-6 overflow-auto">
+          <div className="mb-4 md:mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div>
-              <h1 className="text-3xl font-bold text-white mb-2">{t('blocks.title')}</h1>
-              <p className="text-gray-400">
+              <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">{t('blocks.title')}</h1>
+              <p className="text-gray-400 text-sm md:text-base">
                 {t('blocks.subtitle')} {selectedChain?.chain_name}
               </p>
             </div>
             
             {/* Realtime indicator - hidden during refresh for smooth UX */}
             {currentPage === 1 && !isRefreshing && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-shrink-0">
                 <div className="w-2 h-2 rounded-full bg-green-500"></div>
                 <span className="text-xs text-gray-400">
                   {t('overview.live')}

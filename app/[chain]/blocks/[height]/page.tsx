@@ -116,36 +116,36 @@ export default function BlockDetailPage() {
           onSelectChain={setSelectedChain}
         />
 
-        <main className="flex-1 mt-16 p-6 overflow-auto">
-          <div className="mb-6">
-            <div className="flex items-center text-sm text-gray-400 mb-4">
-              <Link href={`/${chainPath}`} className="hover:text-white">{t('blockDetail.overview')}</Link>
-              <span className="mx-2">/</span>
-              <Link href={`/${chainPath}/blocks`} className="hover:text-white">{t('blockDetail.blocks')}</Link>
-              <span className="mx-2">/</span>
-              <span className="text-white">{params?.height}</span>
+        <main className="flex-1 mt-24 md:mt-16 p-3 md:p-6 overflow-auto">
+          <div className="mb-4 md:mb-6">
+            <div className="flex items-center text-xs md:text-sm text-gray-400 mb-3 md:mb-4 overflow-x-auto scrollbar-none">
+              <Link href={`/${chainPath}`} className="hover:text-white whitespace-nowrap">{t('blockDetail.overview')}</Link>
+              <span className="mx-1 md:mx-2">/</span>
+              <Link href={`/${chainPath}/blocks`} className="hover:text-white whitespace-nowrap">{t('blockDetail.blocks')}</Link>
+              <span className="mx-1 md:mx-2">/</span>
+              <span className="text-white truncate">{params?.height}</span>
             </div>
-            <h1 className="text-3xl font-bold text-white mb-2 flex items-center">
-              <Box className="w-8 h-8 mr-3" />
+            <h1 className="text-xl md:text-3xl font-bold text-white mb-2 flex items-center">
+              <Box className="w-6 h-6 md:w-8 md:h-8 mr-2 md:mr-3" />
               {t('blockDetail.title')} #{params?.height}
             </h1>
           </div>
 
           {loading ? (
-            <div className="text-center py-20">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-              <p className="mt-4 text-gray-400">{t('blockDetail.loading')}</p>
+            <div className="text-center py-12 md:py-20">
+              <div className="inline-block animate-spin rounded-full h-10 w-10 md:h-12 md:w-12 border-t-2 border-b-2 border-blue-500"></div>
+              <p className="mt-4 text-gray-400 text-sm md:text-base">{t('blockDetail.loading')}</p>
             </div>
           ) : block ? (
-            <div className="space-y-6">
+            <div className="space-y-4 md:space-y-6">
               {/* Block Statistics Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg p-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+                <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg p-3 md:p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-gray-400 text-sm font-medium">Height</span>
-                    <Box className="w-5 h-5 text-gray-400" />
+                    <span className="text-gray-400 text-xs md:text-sm font-medium">Height</span>
+                    <Box className="w-4 h-4 md:w-5 md:h-5 text-gray-400" />
                   </div>
-                  <p className="text-2xl font-bold text-white">#{block.height.toLocaleString()}</p>
+                  <p className="text-lg md:text-2xl font-bold text-white truncate">#{block.height.toLocaleString()}</p>
                 </div>
 
                 <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg p-4">

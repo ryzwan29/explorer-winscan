@@ -170,7 +170,7 @@ export default function IBCPacketLifecycle({ chainName, txHash }: IBCPacketLifec
           </div>
         )}
 
-        <div className="bg-[#0f0f0f] border border-gray-800 rounded-lg p-4 mb-6 grid grid-cols-2 gap-4 text-sm">
+        <div className="bg-[#0f0f0f] border border-gray-800 rounded-lg p-3 md:p-4 mb-6 grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 text-sm">
           <div>
             <p className="text-gray-400 mb-1">Source</p>
             <p className="text-white font-mono">

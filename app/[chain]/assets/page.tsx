@@ -446,7 +446,7 @@ export default function AssetsPage() {
           onSelectChain={setSelectedChain}
         />
         
-        <main className="p-6 pt-24">
+        <main className="p-3 md:p-6 pt-24 md:pt-24">
           {/* Page Header with Stats */}
           <div className="mb-6 md:mb-8">
             <div className="flex items-center gap-3 md:gap-4 mb-4 md:mb-6">
@@ -532,16 +532,18 @@ export default function AssetsPage() {
             <div className="mb-4 md:mb-6 flex flex-wrap gap-2 md:gap-3">
               <button
                 onClick={() => setFilterType('all')}
-                className={`flex items-center px-3 md:px-6 py-2 md:py-3 rounded-lg md:rounded-xl text-xs md:text-base font-semibold transition-all ${
+                className={`flex items-center justify-between min-w-[90px] md:min-w-0 px-3 md:px-6 py-2 md:py-3 rounded-lg md:rounded-xl text-xs md:text-base font-semibold transition-all ${
                   filterType === 'all'
                     ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg shadow-blue-500/30'
                     : 'bg-[#1a1a1a] text-gray-400 hover:bg-gray-800 border border-gray-800'
                 }`}
               >
-                <Layers className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2 flex-shrink-0" />
-                <span className="hidden sm:inline">{t('assets.allAssets')}</span>
-                <span className="sm:hidden">All</span>
-                <span className={`ml-1 md:ml-2 px-1.5 md:px-2 py-0.5 rounded text-[10px] md:text-xs font-medium ${
+                <div className="flex items-center">
+                  <Layers className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2 flex-shrink-0" />
+                  <span className="hidden sm:inline">{t('assets.allAssets')}</span>
+                  <span className="sm:hidden">All</span>
+                </div>
+                <span className={`ml-1 md:ml-2 px-1.5 md:px-2 py-0.5 rounded text-[10px] md:text-xs font-medium flex-shrink-0 ${
                   filterType === 'all' ? 'bg-white/20' : 'bg-gray-700'
                 }`}>
                   {totalAssets}
@@ -549,16 +551,18 @@ export default function AssetsPage() {
               </button>
               <button
                 onClick={() => setFilterType('native')}
-                className={`flex items-center px-3 md:px-6 py-2 md:py-3 rounded-lg md:rounded-xl text-xs md:text-base font-semibold transition-all ${
+                className={`flex items-center justify-between min-w-[105px] md:min-w-0 px-3 md:px-6 py-2 md:py-3 rounded-lg md:rounded-xl text-xs md:text-base font-semibold transition-all ${
                   filterType === 'native'
                     ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg shadow-green-500/30'
                     : 'bg-[#1a1a1a] text-gray-400 hover:bg-gray-800 border border-gray-800'
                 }`}
               >
-                <TrendingUp className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2 flex-shrink-0" />
-                <span className="hidden sm:inline">{t('assets.native')}</span>
-                <span className="sm:hidden">Native</span>
-                <span className={`ml-1 md:ml-2 px-1.5 md:px-2 py-0.5 rounded text-[10px] md:text-xs font-medium ${
+                <div className="flex items-center">
+                  <TrendingUp className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2 flex-shrink-0" />
+                  <span className="hidden sm:inline">{t('assets.native')}</span>
+                  <span className="sm:hidden">Native</span>
+                </div>
+                <span className={`ml-1 md:ml-2 px-1.5 md:px-2 py-0.5 rounded text-[10px] md:text-xs font-medium flex-shrink-0 ${
                   filterType === 'native' ? 'bg-white/20' : 'bg-gray-700'
                 }`}>
                   {nativeCount}
@@ -566,16 +570,18 @@ export default function AssetsPage() {
               </button>
               <button
                 onClick={() => setFilterType('tokens')}
-                className={`flex items-center px-3 md:px-6 py-2 md:py-3 rounded-lg md:rounded-xl text-xs md:text-base font-semibold transition-all ${
+                className={`flex items-center justify-between min-w-[100px] md:min-w-0 px-3 md:px-6 py-2 md:py-3 rounded-lg md:rounded-xl text-xs md:text-base font-semibold transition-all ${
                   filterType === 'tokens'
                     ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30'
                     : 'bg-[#1a1a1a] text-gray-400 hover:bg-gray-800 border border-gray-800'
                 }`}
               >
-                <Coins className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2 flex-shrink-0" />
-                <span className="hidden sm:inline">{t('assets.tokens')}</span>
-                <span className="sm:hidden">Tokens</span>
-                <span className={`ml-1 md:ml-2 px-1.5 md:px-2 py-0.5 rounded text-[10px] md:text-xs font-medium ${
+                <div className="flex items-center">
+                  <Coins className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2 flex-shrink-0" />
+                  <span className="hidden sm:inline">{t('assets.tokens')}</span>
+                  <span className="sm:hidden">Tokens</span>
+                </div>
+                <span className={`ml-1 md:ml-2 px-1.5 md:px-2 py-0.5 rounded text-[10px] md:text-xs font-medium flex-shrink-0 ${
                   filterType === 'tokens' ? 'bg-white/20' : 'bg-gray-700'
                 }`}>
                   {tokensCount}
@@ -584,16 +590,18 @@ export default function AssetsPage() {
               {showPRC20Support && (
                 <button
                   onClick={() => setFilterType('prc20')}
-                  className={`flex items-center px-3 md:px-6 py-2 md:py-3 rounded-lg md:rounded-xl text-xs md:text-base font-semibold transition-all ${
+                  className={`flex items-center justify-between min-w-[100px] md:min-w-0 px-3 md:px-6 py-2 md:py-3 rounded-lg md:rounded-xl text-xs md:text-base font-semibold transition-all ${
                     filterType === 'prc20'
                       ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg shadow-orange-500/30'
                       : 'bg-[#1a1a1a] text-gray-400 hover:bg-gray-800 border border-gray-800'
                   }`}
                 >
-                  <Layers className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2 flex-shrink-0" />
-                  <span className="hidden sm:inline">PRC20 Tokens</span>
-                  <span className="sm:hidden">PRC20</span>
-                  <span className={`ml-1 md:ml-2 px-1.5 md:px-2 py-0.5 rounded text-[10px] md:text-xs font-medium ${
+                  <div className="flex items-center">
+                    <Layers className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2 flex-shrink-0" />
+                    <span className="hidden sm:inline">PRC20 Tokens</span>
+                    <span className="sm:hidden">PRC20</span>
+                  </div>
+                  <span className={`ml-1 md:ml-2 px-1.5 md:px-2 py-0.5 rounded text-[10px] md:text-xs font-medium flex-shrink-0 ${
                     filterType === 'prc20' ? 'bg-white/20' : 'bg-gray-700'
                   }`}>
                     {filteredPRC20Tokens.length}
@@ -804,15 +812,15 @@ export default function AssetsPage() {
                           </td>
                           
                           {/* Holders Column */}
-                          <td className="px-3 md:px-6 py-3 md:py-4 text-right">
+                          <td className="px-2 md:px-6 py-3 md:py-4 text-right">
                             <Link
                               href={`/${chainName}/assets/${encodeURIComponent(asset.base)}/holders`}
-                              className="group/holders inline-flex items-center gap-1 md:gap-2 px-2 md:px-4 py-1.5 md:py-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10 hover:from-blue-500/20 hover:to-purple-500/20 border border-blue-500/20 hover:border-blue-500/40 rounded-lg transition-all hover:scale-105"
+                              className="group/holders inline-flex items-center gap-1 px-2 py-1.5 md:px-4 md:py-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10 hover:from-blue-500/20 hover:to-purple-500/20 border border-blue-500/20 hover:border-blue-500/40 rounded-lg transition-all hover:scale-105"
                             >
-                              <span className="text-xs md:text-sm font-medium text-white group-hover/holders:text-blue-400 transition-colors">
+                              <span className="text-[10px] md:text-sm font-medium text-white group-hover/holders:text-blue-400 transition-colors whitespace-nowrap">
                                 {(asset.holders_count && asset.holders_count > 0) ? asset.holders_count.toLocaleString() : '-'}
                               </span>
-                              <TrendingUp className="w-3 h-3 text-gray-500 group-hover/holders:text-blue-400 transition-colors" />
+                              <TrendingUp className="w-2.5 h-2.5 md:w-3 md:h-3 text-gray-500 group-hover/holders:text-blue-400 transition-colors flex-shrink-0" />
                             </Link>
                           </td>
                         </tr>
@@ -838,17 +846,17 @@ export default function AssetsPage() {
                           className="hover:bg-[#0f0f0f] transition-colors group"
                         >
                           {/* # Column */}
-                          <td className="px-4 py-4 text-sm text-gray-400 font-medium">
+                          <td className="px-2 md:px-4 py-3 md:py-4 text-xs md:text-sm text-gray-400 font-medium">
                             #{filteredAssets.length + idx + 1}
                           </td>
                           
                           {/* Name Column with Logo */}
-                          <td className="px-6 py-4">
+                          <td className="px-3 md:px-6 py-3 md:py-4">
                             <Link 
                               href={`/${chainName}/assets/${encodeURIComponent(token.contract_address)}`}
-                              className="flex items-center gap-3"
+                              className="flex items-center gap-2 md:gap-3"
                             >
-                              <div className="relative w-10 h-10 rounded-full bg-gradient-to-br from-orange-500/10 to-red-500/10 border border-orange-500/30 flex-shrink-0 overflow-hidden">
+                              <div className="relative w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-orange-500/10 to-red-500/10 border border-gray-700 flex-shrink-0 overflow-hidden">
                                 {logoUrl ? (
                                   <Image
                                     src={logoUrl}
@@ -867,11 +875,11 @@ export default function AssetsPage() {
                                 )}
                               </div>
                               
-                              <div>
-                                <div className="text-sm font-bold text-white group-hover:text-orange-400 transition-colors">
+                              <div className="min-w-0">
+                                <div className="text-xs md:text-sm font-bold text-white group-hover:text-orange-400 transition-colors truncate">
                                   {token.token_info?.symbol || 'Unknown'}
                                 </div>
-                                <div className="text-xs text-gray-500 mt-0.5">
+                                <div className="text-[10px] md:text-xs text-gray-500 mt-0.5 truncate">
                                   {token.token_info?.name || token.marketing_info?.project || 'PRC20 Token'}
                                 </div>
                               </div>
@@ -879,24 +887,24 @@ export default function AssetsPage() {
                           </td>
                           
                           {/* Token Type */}
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="hidden lg:table-cell px-6 py-4 whitespace-nowrap">
                             <span className="px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider border bg-gradient-to-r from-orange-500/10 to-red-500/10 text-orange-400 border-orange-500/20">
                               PRC20
                             </span>
                           </td>
                           
                           {/* Price */}
-                          <td className="px-6 py-4 text-right">
-                            <span className="text-sm text-gray-500">-</span>
+                          <td className="hidden md:table-cell px-3 md:px-6 py-3 md:py-4 text-right">
+                            <span className="text-xs md:text-sm text-gray-500">-</span>
                           </td>
                           
                           {/* 24h Change */}
-                          <td className="px-6 py-4 text-right">
+                          <td className="hidden xl:table-cell px-6 py-4 text-right">
                             <span className="text-sm text-gray-500">-</span>
                           </td>
                           
                           {/* Supply */}
-                          <td className="px-6 py-4 text-right">
+                          <td className="hidden lg:table-cell px-6 py-4 text-right">
                             <div className="text-sm font-medium text-white">
                               {formattedSupply}
                             </div>
@@ -906,15 +914,15 @@ export default function AssetsPage() {
                           </td>
                           
                           {/* Holders */}
-                          <td className="px-6 py-4 text-right">
+                          <td className="px-2 md:px-6 py-3 md:py-4 text-right">
                             <Link
                               href={`/${chainName}/assets/${encodeURIComponent(token.contract_address)}/holders`}
-                              className="group/holders inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10 hover:from-blue-500/20 hover:to-purple-500/20 border border-blue-500/20 hover:border-blue-500/40 rounded-lg transition-all hover:scale-105"
+                              className="group/holders inline-flex items-center gap-1 px-2 py-1.5 md:px-4 md:py-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10 hover:from-blue-500/20 hover:to-purple-500/20 border border-blue-500/20 hover:border-blue-500/40 rounded-lg transition-all hover:scale-105"
                             >
-                              <span className="text-sm font-medium text-white group-hover/holders:text-blue-400 transition-colors">
+                              <span className="text-[10px] md:text-sm font-medium text-white group-hover/holders:text-blue-400 transition-colors whitespace-nowrap">
                                 {token.num_holders && token.num_holders >= 100 ? '100+' : token.num_holders || '-'}
                               </span>
-                              <TrendingUp className="w-3 h-3 text-gray-500 group-hover/holders:text-blue-400 transition-colors" />
+                              <TrendingUp className="w-2.5 h-2.5 md:w-3 md:h-3 text-gray-500 group-hover/holders:text-blue-400 transition-colors flex-shrink-0" />
                             </Link>
                           </td>
                         </tr>

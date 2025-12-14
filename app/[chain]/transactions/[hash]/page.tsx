@@ -349,17 +349,17 @@ export default function TransactionDetailPage() {
           onSelectChain={setSelectedChain}
         />
 
-        <main className="flex-1 mt-16 p-6 overflow-auto">
-          <div className="mb-6">
-            <div className="flex items-center text-sm text-gray-400 mb-4">
-              <Link href={`/${chainPath}`} className="hover:text-white">{t('txDetail.overview')}</Link>
-              <span className="mx-2">/</span>
-              <Link href={`/${chainPath}/transactions`} className="hover:text-white">{t('txDetail.transactions')}</Link>
-              <span className="mx-2">/</span>
-              <span className="text-white">{params?.hash ? `${(params.hash as string).slice(0, 8)}...` : ''}</span>
+        <main className="flex-1 mt-24 md:mt-16 p-3 md:p-6 overflow-auto">
+          <div className="mb-4 md:mb-6">
+            <div className="flex items-center text-xs md:text-sm text-gray-400 mb-3 md:mb-4 overflow-x-auto scrollbar-none">
+              <Link href={`/${chainPath}`} className="hover:text-white whitespace-nowrap">{t('txDetail.overview')}</Link>
+              <span className="mx-1 md:mx-2">/</span>
+              <Link href={`/${chainPath}/transactions`} className="hover:text-white whitespace-nowrap">{t('txDetail.transactions')}</Link>
+              <span className="mx-1 md:mx-2">/</span>
+              <span className="text-white truncate">{params?.hash ? `${(params.hash as string).slice(0, 8)}...` : ''}</span>
             </div>
-            <h1 className="text-3xl font-bold text-white mb-2 flex items-center">
-              <FileText className="w-8 h-8 mr-3" />
+            <h1 className="text-xl md:text-3xl font-bold text-white mb-2 flex items-center">
+              <FileText className="w-6 h-6 md:w-8 md:h-8 mr-2 md:mr-3" />
               {t('txDetail.title')}
             </h1>
           </div>
@@ -370,54 +370,54 @@ export default function TransactionDetailPage() {
               <p className="mt-4 text-gray-400">{t('txDetail.loading')}</p>
             </div>
           ) : transaction ? (
-            <div className="space-y-6">
+            <div className="space-y-4 md:space-y-6">
               {/* Transaction Status */}
-              <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg p-6">
-                <div className="flex items-center justify-between">
+              <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg p-4 md:p-6">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
                   <div>
-                    <p className="text-gray-400 text-sm mb-2">{t('txDetail.status')}</p>
+                    <p className="text-gray-400 text-xs md:text-sm mb-2">{t('txDetail.status')}</p>
                     <div className="flex items-center gap-2">
                       {transaction.result === 'Success' ? (
                         <>
-                          <CheckCircle className="w-6 h-6 text-green-500" />
-                          <span className="text-2xl font-bold text-green-500">{t('txDetail.success')}</span>
+                          <CheckCircle className="w-5 h-5 md:w-6 md:h-6 text-green-500" />
+                          <span className="text-xl md:text-2xl font-bold text-green-500">{t('txDetail.success')}</span>
                         </>
                       ) : (
                         <>
-                          <XCircle className="w-6 h-6 text-red-500" />
-                          <span className="text-2xl font-bold text-red-500">{t('txDetail.failed')}</span>
+                          <XCircle className="w-5 h-5 md:w-6 md:h-6 text-red-500" />
+                          <span className="text-xl md:text-2xl font-bold text-red-500">{t('txDetail.failed')}</span>
                         </>
                       )}
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-gray-400 text-sm mb-2">{t('txDetail.code')}</p>
-                    <p className="text-2xl font-bold text-white">{transaction.code}</p>
+                  <div className="text-left sm:text-right">
+                    <p className="text-gray-400 text-xs md:text-sm mb-2">{t('txDetail.code')}</p>
+                    <p className="text-xl md:text-2xl font-bold text-white">{transaction.code}</p>
                   </div>
                 </div>
               </div>
 
               {/* Transaction Info */}
-              <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg p-6">
-                <h2 className="text-xl font-bold text-white mb-4">{t('txDetail.txInfo')}</h2>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg p-4 md:p-6">
+                <h2 className="text-lg md:text-xl font-bold text-white mb-3 md:mb-4">{t('txDetail.txInfo')}</h2>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
                   {/* Left Column */}
-                  <div className="space-y-4">
-                    <div className="bg-[#0f0f0f] border border-gray-800 rounded-lg p-4">
+                  <div className="space-y-3 md:space-y-4">
+                    <div className="bg-[#0f0f0f] border border-gray-800 rounded-lg p-3 md:p-4">
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
-                          <Hash className="w-4 h-4 text-gray-400" />
-                          <p className="text-gray-400 text-sm font-semibold">{t('txDetail.txHash')}</p>
+                          <Hash className="w-3 h-3 md:w-4 md:h-4 text-gray-400" />
+                          <p className="text-gray-400 text-xs md:text-sm font-semibold">{t('txDetail.txHash')}</p>
                         </div>
                         <button
                           onClick={() => copyToClipboard(transaction.hash, 'hash')}
-                          className="p-1.5 hover:bg-gray-800 rounded transition-colors"
+                          className="p-1 md:p-1.5 hover:bg-gray-800 rounded transition-colors"
                           title="Copy hash"
                         >
                           {copiedField === 'hash' ? (
-                            <Check className="w-4 h-4 text-green-500" />
+                            <Check className="w-3 h-3 md:w-4 md:h-4 text-green-500" />
                           ) : (
-                            <Copy className="w-4 h-4 text-gray-400" />
+                            <Copy className="w-3 h-3 md:w-4 md:h-4 text-gray-400" />
                           )}
                         </button>
                       </div>

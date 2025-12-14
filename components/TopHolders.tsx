@@ -267,10 +267,10 @@ export default function TopHolders({ chainName, denom }: TopHoldersProps) {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg p-6">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="relative w-10 h-10 rounded-lg bg-blue-500/20 border border-gray-700 flex items-center justify-center overflow-hidden">
+    <div className="space-y-4 md:space-y-6">
+      <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg p-4 md:p-6">
+        <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
+          <div className="relative w-8 h-8 md:w-10 md:h-10 rounded-lg bg-blue-500/20 border border-gray-700 flex items-center justify-center overflow-hidden flex-shrink-0">
             {assetMetadata?.logo ? (
               <Image
                 src={assetMetadata.logo}
@@ -283,49 +283,51 @@ export default function TopHolders({ chainName, denom }: TopHoldersProps) {
                 }}
               />
             ) : (
-              <TrendingUp className="w-5 h-5 text-blue-400" />
+              <TrendingUp className="w-4 h-4 md:w-5 md:h-5 text-blue-400" />
             )}
           </div>
-          <div>
-            <h2 className="text-xl font-bold text-white">
+          <div className="min-w-0 flex-1">
+            <h2 className="text-base md:text-xl font-bold text-white truncate">
               Top Holders {assetMetadata?.symbol && `- ${assetMetadata.symbol}`}
             </h2>
-            <p className="text-gray-400 text-sm">
+            <p className="text-gray-400 text-xs md:text-sm truncate">
               Total Supply: {formatBalance(data.totalSupply)} {assetMetadata?.symbol || data.denom}
             </p>
           </div>
         </div>
 
-        <div className="flex gap-2 mb-6">
+        <div className="flex flex-col sm:flex-row gap-2 mb-4 md:mb-6">
           <div className="flex-1 relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Search className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
               placeholder="Search by address..."
               value={searchAddress}
               onChange={(e) => setSearchAddress(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && searchHolder()}
-              className="w-full bg-[#0f0f0f] border border-gray-800 rounded-lg pl-11 pr-4 py-2.5 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
+              className="w-full bg-[#0f0f0f] border border-gray-800 rounded-lg pl-10 md:pl-11 pr-3 md:pr-4 py-2 md:py-2.5 text-white text-xs md:text-sm placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
             />
           </div>
-          <button
-            onClick={searchHolder}
-            disabled={searching}
-            className="px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {searching ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Search'}
-          </button>
-          {searchAddress && (
+          <div className="flex gap-2">
             <button
-              onClick={() => {
-                setSearchAddress('');
-                loadHolders();
-              }}
-              className="px-4 py-2.5 bg-[#0f0f0f] border border-gray-800 text-gray-400 hover:text-white text-sm rounded-lg transition-colors"
+              onClick={searchHolder}
+              disabled={searching}
+              className="flex-1 sm:flex-none px-4 py-2 md:py-2.5 bg-blue-500 hover:bg-blue-600 text-white text-xs md:text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Clear
+              {searching ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Search'}
             </button>
-          )}
+            {searchAddress && (
+              <button
+                onClick={() => {
+                  setSearchAddress('');
+                  loadHolders();
+                }}
+                className="flex-1 sm:flex-none px-4 py-2 md:py-2.5 bg-[#0f0f0f] border border-gray-800 text-gray-400 hover:text-white text-xs md:text-sm rounded-lg transition-colors"
+              >
+                Clear
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Show message for non-native tokens */}
@@ -349,21 +351,21 @@ export default function TopHolders({ chainName, denom }: TopHoldersProps) {
           </div>
         )}
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto -mx-4 md:mx-0">
           {data.holders.length === 0 ? (
-            <div className="text-center py-12 text-gray-400">
+            <div className="text-center py-8 md:py-12 text-gray-400 text-sm md:text-base">
               No holders found
             </div>
           ) : (
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-800">
-                  <th className="text-left py-3 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">#</th>
-                  <th className="text-left py-3 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Name</th>
-                  <th className="text-left py-3 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Address</th>
-                  <th className="text-right py-3 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Balance</th>
-                  <th className="text-right py-3 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Percentage</th>
-                  <th className="text-right py-3 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Token Type</th>
+                  <th className="text-left py-2 md:py-3 px-2 md:px-4 text-[10px] md:text-xs font-semibold text-gray-400 uppercase tracking-wider">#</th>
+                  <th className="text-left py-2 md:py-3 px-2 md:px-4 text-[10px] md:text-xs font-semibold text-gray-400 uppercase tracking-wider">Name</th>
+                  <th className="text-left py-2 md:py-3 px-2 md:px-4 text-[10px] md:text-xs font-semibold text-gray-400 uppercase tracking-wider">Address</th>
+                  <th className="text-right py-2 md:py-3 px-2 md:px-4 text-[10px] md:text-xs font-semibold text-gray-400 uppercase tracking-wider">Balance</th>
+                  <th className="text-right py-2 md:py-3 px-2 md:px-4 text-[10px] md:text-xs font-semibold text-gray-400 uppercase tracking-wider hidden sm:table-cell">Percentage</th>
+                  <th className="text-right py-2 md:py-3 px-2 md:px-4 text-[10px] md:text-xs font-semibold text-gray-400 uppercase tracking-wider hidden lg:table-cell">Token Type</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-800">
@@ -374,12 +376,12 @@ export default function TopHolders({ chainName, denom }: TopHoldersProps) {
                       key={holder.address}
                       className="hover:bg-[#0f0f0f] transition-colors"
                     >
-                      <td className="py-3 px-4 text-sm text-gray-400">{idx + 1}</td>
+                      <td className="py-2 md:py-3 px-2 md:px-4 text-xs md:text-sm text-gray-400">{idx + 1}</td>
                       
                       {/* Token Name with Logo */}
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-3">
-                          <div className="relative w-8 h-8 rounded-full bg-blue-500/20 border border-gray-700 flex-shrink-0 overflow-hidden flex items-center justify-center">
+                      <td className="py-2 md:py-3 px-2 md:px-4">
+                        <div className="flex items-center gap-2 md:gap-3">
+                          <div className="relative w-6 h-6 md:w-8 md:h-8 rounded-full bg-blue-500/20 border border-gray-700 flex-shrink-0 overflow-hidden flex items-center justify-center">
                             {assetMetadata?.logo ? (
                               <Image
                                 src={assetMetadata.logo}
@@ -392,47 +394,47 @@ export default function TopHolders({ chainName, denom }: TopHoldersProps) {
                                 }}
                               />
                             ) : (
-                              <Coins className="w-4 h-4 text-gray-600" />
+                              <Coins className="w-3 h-3 md:w-4 md:h-4 text-gray-600" />
                             )}
                           </div>
-                          <div>
-                            <div className="text-sm font-bold text-white">
+                          <div className="min-w-0">
+                            <div className="text-xs md:text-sm font-bold text-white truncate">
                               {assetMetadata?.symbol || 'Unknown'}
                             </div>
-                            <div className="text-xs text-gray-500">
+                            <div className="text-[10px] md:text-xs text-gray-500 truncate">
                               {assetMetadata?.name || data.denom.slice(0, 20)}
                             </div>
                           </div>
                         </div>
                       </td>
                       
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono text-sm text-blue-400">
-                            {holder.address.slice(0, 12)}...{holder.address.slice(-8)}
+                      <td className="py-2 md:py-3 px-2 md:px-4">
+                        <div className="flex items-center gap-1 md:gap-2">
+                          <span className="font-mono text-[10px] md:text-sm text-blue-400 truncate">
+                            {holder.address.slice(0, 8)}...{holder.address.slice(-6)}
                           </span>
                           <button
                             onClick={() => copyAddress(holder.address)}
-                            className="text-gray-400 hover:text-white transition"
+                            className="text-gray-400 hover:text-white transition flex-shrink-0"
                           >
                             {copiedAddress === holder.address ? (
-                              <Check className="w-4 h-4 text-green-500" />
+                              <Check className="w-3 h-3 md:w-4 md:h-4 text-green-500" />
                             ) : (
-                              <Copy className="w-4 h-4" />
+                              <Copy className="w-3 h-3 md:w-4 md:h-4" />
                             )}
                           </button>
                         </div>
                       </td>
-                      <td className="py-3 px-4 text-right text-sm font-medium text-white">
+                      <td className="py-2 md:py-3 px-2 md:px-4 text-right text-xs md:text-sm font-medium text-white">
                         {formatBalance(holder.balance)}
                       </td>
-                      <td className="py-3 px-4 text-right">
-                        <span className="px-2 py-1 bg-blue-500/10 text-blue-400 rounded text-xs font-medium">
+                      <td className="py-2 md:py-3 px-2 md:px-4 text-right hidden sm:table-cell">
+                        <span className="px-1.5 md:px-2 py-0.5 md:py-1 bg-blue-500/10 text-blue-400 rounded text-[10px] md:text-xs font-medium">
                           {holder.percentage?.toFixed(4)}%
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-right">
-                        <span className={`px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-wider border ${
+                      <td className="py-2 md:py-3 px-2 md:px-4 text-right hidden lg:table-cell">
+                        <span className={`px-2 md:px-3 py-0.5 md:py-1 rounded-xl text-[10px] md:text-xs font-bold uppercase tracking-wider border ${
                           data.denom.startsWith('paxi1') && data.denom.length > 40
                             ? 'bg-gradient-to-r from-orange-500/10 to-red-500/10 text-orange-400 border-orange-500/20'
                             : data.denom.startsWith('ibc/') 

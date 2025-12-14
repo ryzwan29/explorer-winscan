@@ -182,26 +182,27 @@ export default function KeplrWallet({ selectedChain }: KeplrWalletProps) {
           <button
             onClick={openCoinTypeModal}
             disabled={isConnecting || !selectedChain}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Wallet className="w-4 h-4" />
-            {isConnecting ? 'Connecting...' : 'Connect Wallet'}
+            <span className="hidden sm:inline">{isConnecting ? 'Connecting...' : 'Connect Wallet'}</span>
+            <span className="sm:hidden text-xs">{isConnecting ? '...' : 'Connect'}</span>
           </button>
         ) : (
-          <div className="flex items-center gap-2 px-3 py-2 bg-[#1a1a1a] border border-gray-700 rounded-lg">
-            <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 bg-[#1a1a1a] border border-gray-700 rounded-lg">
+            <div className="flex items-center gap-1 sm:gap-2">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              <code className="text-sm text-gray-300 font-mono">
+              <code className="text-xs sm:text-sm text-gray-300 font-mono">
                 {account && formatAddress(account.address)}
               </code>
-              <span className="text-xs text-gray-500 bg-gray-800 px-2 py-1 rounded">
+              <span className="hidden md:inline text-xs text-gray-500 bg-gray-800 px-2 py-1 rounded">
                 {getWalletDisplayName()}
               </span>
             </div>
-            <div className="flex items-center gap-1 ml-1">
+            <div className="flex items-center gap-0.5 sm:gap-1 ml-0.5 sm:ml-1">
               <button
                 onClick={handleCopyAddress}
-                className="p-1.5 hover:bg-gray-800 rounded transition-colors group relative"
+                className="p-1 sm:p-1.5 hover:bg-gray-800 rounded transition-colors group relative"
                 title="Copy address"
               >
                 {copied ? (
@@ -212,7 +213,7 @@ export default function KeplrWallet({ selectedChain }: KeplrWalletProps) {
               </button>
               <button
                 onClick={handleDisconnect}
-                className="p-1.5 hover:bg-gray-800 rounded transition-colors group"
+                className="p-1 sm:p-1.5 hover:bg-gray-800 rounded transition-colors group"
                 title="Disconnect"
               >
                 <LogOut className="w-3.5 h-3.5 text-gray-400 group-hover:text-red-400" />

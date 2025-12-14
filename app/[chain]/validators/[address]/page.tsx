@@ -954,7 +954,7 @@ export default function ValidatorDetailPage() {
         <Sidebar selectedChain={selectedChain} />
         <div className="flex-1 flex flex-col">
           <Header chains={chains} selectedChain={selectedChain} onSelectChain={setSelectedChain} />
-          <main className="flex-1 mt-16 p-6 flex items-center justify-center">
+          <main className="flex-1 mt-24 md:mt-16 p-3 md:p-6 flex items-center justify-center">
             <div className="flex flex-col items-center gap-4">
               <div className="relative">
                 <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500/20 border-t-blue-500"></div>
@@ -974,7 +974,7 @@ export default function ValidatorDetailPage() {
         <Sidebar selectedChain={selectedChain} />
         <div className="flex-1 flex flex-col">
           <Header chains={chains} selectedChain={selectedChain} onSelectChain={setSelectedChain} />
-          <main className="flex-1 mt-16 p-6 flex items-center justify-center">
+          <main className="flex-1 mt-24 md:mt-16 p-3 md:p-6 flex items-center justify-center">
             <div className="text-center">
               <h2 className="text-2xl font-bold text-white mb-2">{t('validatorDetail.notFound')}</h2>
               <button 
@@ -997,25 +997,25 @@ export default function ValidatorDetailPage() {
       <div className="flex-1 flex flex-col">
         <Header chains={chains} selectedChain={selectedChain} onSelectChain={setSelectedChain} />
 
-        <main className="flex-1 mt-16 p-6 overflow-auto scroll-smooth">
+        <main className="flex-1 mt-24 md:mt-16 p-3 md:p-6 overflow-auto scroll-smooth">
           {/* Header Section */}
-          <div className="mb-6 flex items-center justify-between animate-fade-in">
-            <div>
-              <div className="flex items-center text-sm text-gray-400 mb-2">
-                <Link href={`/${chainPath}`} className="hover:text-blue-500 transition-all duration-200">{t('validatorDetail.overview')}</Link>
-                <span className="mx-2">/</span>
-                <Link href={`/${chainPath}/validators`} className="hover:text-blue-500 transition-all duration-200">{t('validatorDetail.validators')}</Link>
-                <span className="mx-2">/</span>
-                <span className="text-white">{validator.moniker}</span>
+          <div className="mb-4 md:mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-fade-in">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center text-xs md:text-sm text-gray-400 mb-2 overflow-x-auto scrollbar-none">
+                <Link href={`/${chainPath}`} className="hover:text-blue-500 transition-all duration-200 whitespace-nowrap">{t('validatorDetail.overview')}</Link>
+                <span className="mx-1 md:mx-2">/</span>
+                <Link href={`/${chainPath}/validators`} className="hover:text-blue-500 transition-all duration-200 whitespace-nowrap">{t('validatorDetail.validators')}</Link>
+                <span className="mx-1 md:mx-2">/</span>
+                <span className="text-white truncate">{validator.moniker}</span>
               </div>
-              <h1 className="text-3xl font-bold text-white mb-2">{t('validatorDetail.title')}</h1>
-              <p className="text-gray-400">
+              <h1 className="text-xl md:text-3xl font-bold text-white mb-2">{t('validatorDetail.title')}</h1>
+              <p className="text-gray-400 text-sm md:text-base truncate">
                 {t('validatorDetail.subtitle')} {validator.moniker}
               </p>
             </div>
             
             {/* Live indicator */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-shrink-0">
               <div className={`w-2 h-2 rounded-full ${isRefreshing ? 'bg-blue-500 animate-pulse' : 'bg-green-500'}`}></div>
               <span className="text-xs text-gray-400">
                 {isRefreshing ? t('validatorDetail.updating') : t('validatorDetail.live')}
@@ -1024,12 +1024,12 @@ export default function ValidatorDetailPage() {
           </div>
 
           {/* Overview Card */}
-          <div className="bg-[#1a1a1a] rounded-lg p-6 mb-6 hover:bg-[#1a1a1a]/80 transition-all duration-200">
-            <h2 className="text-xl font-bold text-white mb-6">{t('validatorDetail.overview')}</h2>
+          <div className="bg-[#1a1a1a] rounded-lg p-4 md:p-6 mb-4 md:mb-6 hover:bg-[#1a1a1a]/80 transition-all duration-200">
+            <h2 className="text-lg md:text-xl font-bold text-white mb-4 md:mb-6">{t('validatorDetail.overview')}</h2>
             
-            <div className="space-y-6">
+            <div className="space-y-4 md:space-y-6">
               {/* Validator Bio */}
-              <div className="flex items-start gap-4">
+              <div className="flex items-start gap-3 md:gap-4">
                 <div className="relative group">
                   <ValidatorAvatar
                     identity={validator.identity}
@@ -1112,19 +1112,19 @@ export default function ValidatorDetailPage() {
               </div>
 
               {/* 2 Column Layout: Addresses & Uptime */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
                 {/* Left Column: Addresses */}
-                <div className="bg-[#111111] rounded-lg p-5 border border-gray-800 space-y-3">
+                <div className="bg-[#111111] rounded-lg p-3 md:p-5 border border-gray-800 space-y-3">
                   {/* Account Address */}
-                <div className="flex items-start gap-3">
-                  <div className="w-24 flex-shrink-0">
-                    <p className="text-gray-400 text-sm font-medium">Account</p>
+                <div className="flex flex-col sm:flex-row items-start gap-2 sm:gap-3">
+                  <div className="w-full sm:w-24 flex-shrink-0">
+                    <p className="text-gray-400 text-xs md:text-sm font-medium">Account</p>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 bg-[#0a0a0a] rounded px-3 py-2 hover:bg-[#0f0f0f] transition-all duration-200">
+                  <div className="flex-1 min-w-0 w-full">
+                    <div className="flex items-center gap-2 bg-[#0a0a0a] rounded px-2 md:px-3 py-1.5 md:py-2 hover:bg-[#0f0f0f] transition-all duration-200">
                       <Link
                         href={`/${chainPath}/accounts/${validator?.accountAddress || (validator?.address ? convertValidatorToAccountAddress(validator.address) : '')}`}
-                        className="text-blue-400 hover:text-blue-300 font-mono text-sm break-all flex-1 transition-colors"
+                        className="text-blue-400 hover:text-blue-300 font-mono text-xs md:text-sm break-all flex-1 transition-colors"
                       >
                         {validator?.accountAddress || (validator?.address ? convertValidatorToAccountAddress(validator.address) : 'Not Available')}
                       </Link>
@@ -1136,7 +1136,7 @@ export default function ValidatorDetailPage() {
                         className="text-gray-400 hover:text-blue-400 transition-all duration-200 flex-shrink-0 hover:scale-110 active:scale-95"
                         title="Copy address"
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                         </svg>
                       </button>
@@ -1145,13 +1145,13 @@ export default function ValidatorDetailPage() {
                 </div>
                 
                 {/* Account Balance */}
-                <div className="flex items-start gap-3">
-                  <div className="w-24 flex-shrink-0">
-                    <p className="text-gray-400 text-sm font-medium">Balance</p>
+                <div className="flex flex-col sm:flex-row items-start gap-2 sm:gap-3">
+                  <div className="w-full sm:w-24 flex-shrink-0">
+                    <p className="text-gray-400 text-xs md:text-sm font-medium">Balance</p>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 bg-[#0a0a0a] rounded px-3 py-2">
-                      <p className="text-green-400 font-semibold text-sm flex-1">
+                  <div className="flex-1 min-w-0 w-full">
+                    <div className="flex items-center gap-2 bg-[#0a0a0a] rounded px-2 md:px-3 py-1.5 md:py-2">
+                      <p className="text-green-400 font-semibold text-xs md:text-sm flex-1">
                         {validatorBalance}
                       </p>
                       {validatorBalance !== 'Loading...' && validatorBalance !== 'N/A' && validator?.accountAddress && isConnected && account?.address === validator.accountAddress && (
@@ -1168,19 +1168,19 @@ export default function ValidatorDetailPage() {
                 </div>
 
                 {/* Operator Address */}
-                <div className="flex items-start gap-3">
-                  <div className="w-24 flex-shrink-0">
-                    <p className="text-gray-400 text-sm font-medium">Operator</p>
+                <div className="flex flex-col sm:flex-row items-start gap-2 sm:gap-3">
+                  <div className="w-full sm:w-24 flex-shrink-0">
+                    <p className="text-gray-400 text-xs md:text-sm font-medium">Operator</p>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 bg-[#0a0a0a] rounded px-3 py-2 hover:bg-[#0f0f0f] transition-all duration-200">
-                      <p className="text-blue-400 font-mono text-sm break-all flex-1">{validator.address}</p>
+                  <div className="flex-1 min-w-0 w-full">
+                    <div className="flex items-center gap-2 bg-[#0a0a0a] rounded px-2 md:px-3 py-1.5 md:py-2 hover:bg-[#0f0f0f] transition-all duration-200">
+                      <p className="text-blue-400 font-mono text-xs md:text-sm break-all flex-1">{validator.address}</p>
                       <button 
                         onClick={() => navigator.clipboard.writeText(validator.address)}
                         className="text-gray-400 hover:text-blue-400 transition-all duration-200 flex-shrink-0 hover:scale-110 active:scale-95"
                         title="Copy address"
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                         </svg>
                       </button>
@@ -1189,13 +1189,13 @@ export default function ValidatorDetailPage() {
                 </div>
 
                 {/* Consensus Address */}
-                <div className="flex items-start gap-3">
-                  <div className="w-24 flex-shrink-0">
-                    <p className="text-gray-400 text-sm font-medium">Consensus</p>
+                <div className="flex flex-col sm:flex-row items-start gap-2 sm:gap-3">
+                  <div className="w-full sm:w-24 flex-shrink-0">
+                    <p className="text-gray-400 text-xs md:text-sm font-medium">Consensus</p>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 bg-[#0a0a0a] rounded px-3 py-2 hover:bg-[#0f0f0f] transition-all duration-200">
-                      <p className="text-blue-400 font-mono text-sm break-all flex-1">
+                  <div className="flex-1 min-w-0 w-full">
+                    <div className="flex items-center gap-2 bg-[#0a0a0a] rounded px-2 md:px-3 py-1.5 md:py-2 hover:bg-[#0f0f0f] transition-all duration-200">
+                      <p className="text-blue-400 font-mono text-xs md:text-sm break-all flex-1">
                         {validator.consensusAddress || 'N/A'}
                       </p>
                       {validator.consensusAddress && (
@@ -1334,7 +1334,7 @@ export default function ValidatorDetailPage() {
               </div>
 
               {/* 3 column info */}
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 <div className="bg-[#111111] rounded-lg p-3 hover:bg-[#111111]/70 hover:scale-105 transition-all duration-200">
                   <p className="text-gray-400 text-xs font-medium mb-1">Block</p>
                   <p className="text-white font-bold text-lg">0</p>
@@ -2712,7 +2712,7 @@ export default function ValidatorDetailPage() {
                     </div>
                     
                     {/* Percentage Buttons */}
-                    <div className="grid grid-cols-4 gap-2 mt-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3">
                       {[25, 50, 75, 100].map((percentage) => (
                         <button
                           key={percentage}

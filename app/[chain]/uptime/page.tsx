@@ -655,7 +655,7 @@ export default function UptimePage() {
                         <td className="hidden lg:table-cell px-6 py-4">
                           {/* Block Signing Visualization */}
                           <div className="flex items-center gap-2">
-                            <div className="flex-1 relative h-8 bg-[#0a0a0a] rounded-sm overflow-hidden border border-gray-800" style={{ minWidth: '600px', maxWidth: '800px' }}>
+                            <div className="flex-1 relative h-8 bg-[#0a0a0a] rounded-sm overflow-hidden border border-gray-800 lg:min-w-[600px] lg:max-w-[800px]">
                               <div className="blocks-container absolute inset-0">
                                 <div className={`blocks-wrapper ${validator.blockSignatures?.length === 100 ? 'animated' : ''}`}>
                                   {validator.blockSignatures && validator.blockSignatures.length > 0 ? (

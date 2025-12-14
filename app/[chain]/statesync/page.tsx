@@ -208,7 +208,7 @@ echo "State sync configured! Check logs: journalctl -u ${selectedChain.chain_nam
           onSelectChain={setSelectedChain}
         />
 
-        <main className="flex-1 mt-16 p-6 overflow-auto">
+        <main className="flex-1 mt-24 md:mt-16 p-3 md:p-6 overflow-auto">
           <div className="mb-6">
             <h1 className="text-3xl font-bold text-white mb-2 flex items-center">
               <RefreshCw className="w-8 h-8 mr-3" />

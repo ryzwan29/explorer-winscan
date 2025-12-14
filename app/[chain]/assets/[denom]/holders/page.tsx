@@ -72,7 +72,7 @@ export default function AssetHoldersPage() {
           onSelectChain={setSelectedChain}
         />
         
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 pt-20 md:pt-24">
+        <main className="flex-1 overflow-y-auto px-4 md:px-6 pt-[180px] md:pt-24 pb-4 md:pb-6">
           <div className="max-w-7xl mx-auto space-y-4 md:space-y-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1">

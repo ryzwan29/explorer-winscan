@@ -322,11 +322,11 @@ export default function ValidatorsPage() {
           onSelectChain={setSelectedChain}
         />
 
-        <main className="flex-1 mt-16 p-6">
-          <div className="mb-6 flex items-center justify-between">
+        <main className="flex-1 mt-24 md:mt-16 p-3 md:p-6">
+          <div className="mb-4 md:mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div>
-              <h1 className="text-3xl font-bold text-white mb-2">{t('validators.title')}</h1>
-              <p className="text-gray-400">
+              <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">{t('validators.title')}</h1>
+              <p className="text-gray-400 text-sm md:text-base">
                 {t('validators.subtitle')} {selectedChain?.chain_name}
               </p>
             </div>
@@ -338,13 +338,13 @@ export default function ValidatorsPage() {
           </div>
 
           {/* Filter and Search Bar */}
-          <div className="mb-6 flex items-center justify-between gap-4">
+          <div className="mb-4 md:mb-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 md:gap-4">
             {/* Filter Dropdown */}
-            <div className="relative">
+            <div className="relative w-full sm:w-auto">
               <select
                 value={filter}
                 onChange={(e) => setFilter(e.target.value as any)}
-                className="appearance-none bg-[#1a1a1a] border border-gray-800 rounded-lg px-4 py-2 pr-10 text-white focus:outline-none focus:border-blue-500 cursor-pointer"
+                className="appearance-none w-full bg-[#1a1a1a] border border-gray-800 rounded-lg px-3 md:px-4 py-2 pr-10 text-sm md:text-base text-white focus:outline-none focus:border-blue-500 cursor-pointer"
               >
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
@@ -358,14 +358,14 @@ export default function ValidatorsPage() {
             </div>
 
             {/* Search Input */}
-            <div className="flex-1 max-w-md">
+            <div className="flex-1 w-full sm:max-w-md">
               <div className="relative">
                 <input
                   type="text"
                   placeholder="Search validator"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-[#1a1a1a] border border-gray-800 rounded-lg pl-10 pr-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                  className="w-full bg-[#1a1a1a] border border-gray-800 rounded-lg pl-9 md:pl-10 pr-3 md:pr-4 py-2 text-sm md:text-base text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
                 />
                 <div className="absolute left-3 top-1/2 -translate-y-1/2">
                   <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
