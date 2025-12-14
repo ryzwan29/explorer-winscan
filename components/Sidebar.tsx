@@ -22,7 +22,8 @@ import {
   ChevronDown,
   ChevronUp,
   Zap,
-  Send
+  Send,
+  Code
 } from 'lucide-react';
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { ChainData } from '@/types/chain';
@@ -88,7 +89,8 @@ export default function Sidebar({ selectedChain }: SidebarProps) {
         subItems: [
           { name: 'EVM Blocks', translationKey: 'menu.evm.blocks', path: `${chainPath}/evm/blocks`, icon: <Box className="w-4 h-4" /> },
           { name: 'EVM Transactions', translationKey: 'menu.evm.transactions', path: `${chainPath}/evm/transactions`, icon: <FileText className="w-4 h-4" /> },
-          // { name: 'EVM Contracts', translationKey: 'menu.evm.contracts', path: `${chainPath}/evm/contracts`, icon: <FileText className="w-4 h-4" /> },
+          { name: 'EVM Contracts', translationKey: 'menu.evm.contracts', path: `${chainPath}/evm/contracts`, icon: <Code className="w-4 h-4" /> },
+          { name: 'PRC20 Tokens', translationKey: 'menu.prc20', path: `${chainPath}/prc20-tokens`, icon: <Coins className="w-4 h-4" /> },
         ]
       });
     }
