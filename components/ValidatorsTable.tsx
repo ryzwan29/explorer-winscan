@@ -124,43 +124,66 @@ const ValidatorRow = memo(({
 
   return (
     <tr className="border-b border-gray-800 hover:bg-[#1a1a1a] transition-colors duration-150">
-      <td className="px-2 md:px-6 py-3 md:py-4">
+      <td className="px-1.5 md:px-6 py-1.5 md:py-4">
         <div className="flex items-center space-x-1 md:space-x-2">
-          <span className="text-gray-400 font-medium text-xs md:text-sm min-w-[20px] md:min-w-[30px]">{rank}</span>
+          <span className="text-gray-400 font-medium text-[9px] md:text-sm min-w-[16px] md:min-w-[30px]">{rank}</span>
         </div>
       </td>
-      <td className="px-3 md:px-6 py-3 md:py-4">
-        <div className="flex items-center space-x-2 md:space-x-3">
+      <td className="px-2 md:px-6 py-1.5 md:py-4">
+        {/* Mobile: Horizontal layout - Avatar, Name, Voting Power */}
+        <div className="flex md:hidden items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5 min-w-0 flex-1">
+            <div className="flex-shrink-0">
+              <ValidatorAvatar
+                identity={validator.identity}
+                moniker={validator.moniker}
+                size="sm"
+              />
+            </div>
+            <Link
+              href={`/${chainPath}/validators/${validator.address}`}
+              className="text-white hover:text-blue-400 text-[11px] font-medium transition-colors truncate flex items-center h-8"
+            >
+              {validator.moniker || t('common.unknown')}
+            </Link>
+          </div>
+          <div className="text-[9px] text-gray-400 whitespace-nowrap flex-shrink-0 flex items-center h-8">
+            {formatVotingPower(validator.votingPower || '0')} {asset?.symbol}
+          </div>
+        </div>
+        
+        {/* Desktop: Original vertical layout */}
+        <div className="hidden md:flex items-center space-x-3">
           <ValidatorAvatar
             identity={validator.identity}
             moniker={validator.moniker}
             size="md"
           />
-          <div className="min-w-0">
+          <div className="min-w-0 flex flex-col gap-0">
             <Link
               href={`/${chainPath}/validators/${validator.address}`}
-              className="text-white hover:text-blue-400 text-sm md:text-base font-medium transition-colors truncate block"
+              className="text-white hover:text-blue-400 text-base font-medium transition-colors truncate block leading-tight"
             >
               {validator.moniker || t('common.unknown')}
             </Link>
-            <div className="flex items-center gap-1 md:gap-2 mt-0.5">
-              <div className="text-xs md:text-sm text-gray-500 font-mono truncate max-w-[80px] md:max-w-[200px]">
-                {validator.address?.slice(0, 10)}...
+            <div className="flex items-center gap-2 text-xs text-gray-500">
+              <div className="font-mono truncate max-w-[200px]">
+                {validator.address?.slice(0, 8)}...
               </div>
               <button
                 onClick={(e) => {
                   navigator.clipboard.writeText(validator.address || '');
                   const btn = e.currentTarget as HTMLElement;
                   const originalContent = btn.innerHTML;
-                  btn.innerHTML = '<svg class="w-3 h-3 md:w-4 md:h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+                  btn.innerHTML = '<svg class="w-3 h-3 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
                   setTimeout(() => {
                     btn.innerHTML = originalContent;
                   }, 1500);
                 }}
-                className="text-gray-500 hover:text-gray-300 transition-colors"
+                className="text-gray-500 hover:text-gray-300 transition-colors flex-shrink-0"
                 title="Copy validator address"
               >
-                <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                 </svg>
               </button>
@@ -265,8 +288,8 @@ const ValidatorRow = memo(({
           </div>
         </div>
       </td>
-      <td className="px-2 md:px-6 py-3 md:py-4 text-gray-300">
-        <span className="text-xs md:text-sm">{formatCommission(validator.commission || '0')}</span>
+      <td className="px-1.5 md:px-6 py-1.5 md:py-4 text-gray-300">
+        <span className="text-[9px] md:text-sm">{formatCommission(validator.commission || '0')}</span>
       </td>
       <td className="hidden lg:table-cell px-6 py-4 text-gray-300">
         {validator.delegatorsCount !== undefined && validator.delegatorsCount > 0 ? (
