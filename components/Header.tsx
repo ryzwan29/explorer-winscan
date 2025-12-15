@@ -47,7 +47,6 @@ function Header({ chains, selectedChain, onSelectChain }: HeaderProps) {
           router.push(`/${chainPath}/blocks/${query}`);
           setSearchQuery('');
           return;
-          }
         }
       } catch (err) {
         console.log('Cosmos block not found, trying EVM...');
