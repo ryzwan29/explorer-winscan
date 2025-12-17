@@ -51,6 +51,8 @@ interface PRC20Token {
     marketing?: string;
   } | null;
   num_holders?: number;
+  price_usd?: number;
+  price_change_24h?: number;
 }
 
 interface AssetsResponse {
@@ -295,7 +297,7 @@ export default function AssetsPage() {
     try {
       setPrc20Loading(true);
       
-      let url = `/api/prc20-tokens?chain=${chainName}&limit=20`;
+      let url = `/api/prc20-tokens?chain=${chainName}&limit=1000`;
       if (pageKey) {
         url += `&key=${encodeURIComponent(pageKey)}`;
       }
@@ -307,10 +309,70 @@ export default function AssetsPage() {
 
       const data = await response.json();
       
+      // Fetch all pools in one request
+      let poolsMap = new Map();
+      try {
+        const poolsResponse = await fetch(
+          'https://mainnet-lcd.paxinet.io/paxi/swap/all_pools',
+          { signal: AbortSignal.timeout(5000) }
+        );
+        
+        if (poolsResponse.ok) {
+          const poolsData = await poolsResponse.json();
+          
+          // Check different possible response structures
+          const pools = poolsData.pools || poolsData.result?.pools || poolsData;
+          
+          if (Array.isArray(pools)) {
+            pools.forEach((pool: any) => {
+              const prc20Address = pool.prc20 || pool.prc20_address || pool.token || pool.contract_address;
+              if (prc20Address) {
+                poolsMap.set(prc20Address, pool);
+              }
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch all pools:', error);
+      }
+      
+      // Calculate prices from pool data
+      const tokensWithPrices = data.tokens.map((token: PRC20Token) => {
+        const pool = poolsMap.get(token.contract_address);
+        
+        let priceInPaxi: number | undefined = undefined;
+        
+        // Calculate price from pool
+        if (pool) {
+          try {
+            const paxiReserveRaw = pool.reserve_paxi;
+            const tokenReserveRaw = pool.reserve_prc20;
+            
+            if (paxiReserveRaw && tokenReserveRaw) {
+              const paxiReserve = parseFloat(paxiReserveRaw) / 1e6;
+              const tokenDecimals = token.token_info?.decimals || 6;
+              const tokenReserve = parseFloat(tokenReserveRaw) / Math.pow(10, tokenDecimals);
+              
+              if (tokenReserve > 0 && paxiReserve > 0) {
+                priceInPaxi = paxiReserve / tokenReserve;
+              }
+            }
+          } catch (error) {
+            console.error(`Failed to calculate price for ${token.token_info?.symbol}:`, error);
+          }
+        }
+        
+        return {
+          ...token,
+          price_usd: priceInPaxi,
+          price_change_24h: undefined // No historical data available yet
+        };
+      });
+      
       if (pageKey) {
-        setPrc20Tokens(prev => [...prev, ...data.tokens]);
+        setPrc20Tokens(prev => [...prev, ...tokensWithPrices]);
       } else {
-        setPrc20Tokens(data.tokens);
+        setPrc20Tokens(tokensWithPrices);
       }
       
       setPrc20NextKey(data.pagination.next_key || null);
@@ -411,6 +473,15 @@ export default function AssetsPage() {
       const bName = (b.symbol || b.name || b.display || '').toLowerCase();
       return aName.localeCompare(bName);
     });
+  
+  // Apply limit based on filter type
+  const displayedAssets = filterType === 'all' 
+    ? filteredAssets.slice(0, 20) 
+    : filterType === 'native'
+    ? filteredAssets.slice(0, 20)
+    : filterType === 'tokens'
+    ? filteredAssets.slice(0, 20)
+    : filteredAssets; // prc20 shows all
 
   const nativeCount = assets.filter(isNativeAsset).length;
   const tokensCount = assets.length - nativeCount;
@@ -612,17 +683,17 @@ export default function AssetsPage() {
           )}
 
           {/* Assets Table */}
-          {((filteredAssets.length > 0 && filterType !== 'prc20') || (filterType === 'all' && showPRC20Support && prc20Tokens.length > 0)) && (
+          {((displayedAssets.length > 0 && filterType !== 'prc20') || (filterType === 'all' && showPRC20Support && prc20Tokens.length > 0)) && (
             <>
               {/* Results info */}
               {searchQuery && filterType !== 'all' && (
                 <div className="mb-3 md:mb-4 text-xs md:text-sm text-gray-400">
-                  {t('assets.showingResults')} {filteredAssets.length} {t('assets.of')} {assets.length} {t('assets.assetsText')}
+                  {t('assets.showingResults')} {displayedAssets.length} {t('assets.of')} {assets.length} {t('assets.assetsText')}
                 </div>
               )}
               {searchQuery && filterType === 'all' && (
                 <div className="mb-3 md:mb-4 text-xs md:text-sm text-gray-400">
-                  Showing {filteredAssets.length} asset(s) and {filteredPRC20Tokens.length} PRC20 token(s) matching "{searchQuery}"
+                  Showing {displayedAssets.length} asset(s) and {filteredPRC20Tokens.length} PRC20 token(s) matching "{searchQuery}"
                 </div>
               )}
               
@@ -655,7 +726,7 @@ export default function AssetsPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-800">
-                    {filteredAssets.map((asset, index) => {
+                    {displayedAssets.map((asset, index) => {
                       const displayUnit = asset.denom_units?.find(u => u.denom === asset.display);
                       const exponent = displayUnit ? displayUnit.exponent : 6;
                       const logoUrl = asset.logo || asset.uri || '';
@@ -847,7 +918,7 @@ export default function AssetsPage() {
                         >
                           {/* # Column */}
                           <td className="px-2 md:px-4 py-3 md:py-4 text-xs md:text-sm text-gray-400 font-medium">
-                            #{filteredAssets.length + idx + 1}
+                            #{displayedAssets.length + idx + 1}
                           </td>
                           
                           {/* Name Column with Logo */}
@@ -895,12 +966,33 @@ export default function AssetsPage() {
                           
                           {/* Price */}
                           <td className="hidden md:table-cell px-3 md:px-6 py-3 md:py-4 text-right">
-                            <span className="text-xs md:text-sm text-gray-500">-</span>
+                            {token.price_usd !== undefined ? (
+                              <div className="text-xs md:text-sm font-medium text-white">
+                                {token.price_usd.toFixed(8)} PAXI
+                              </div>
+                            ) : (
+                              <span className="text-xs md:text-sm text-gray-500">-</span>
+                            )}
                           </td>
                           
                           {/* 24h Change */}
                           <td className="hidden xl:table-cell px-6 py-4 text-right">
-                            <span className="text-sm text-gray-500">-</span>
+                            {token.price_change_24h !== undefined && token.price_change_24h !== 0 ? (
+                              <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium ${
+                                token.price_change_24h >= 0 
+                                  ? 'bg-green-500/10 text-green-400' 
+                                  : 'bg-red-500/10 text-red-400'
+                              }`}>
+                                <span className="text-[10px]">
+                                  {token.price_change_24h >= 0 ? '▲' : '▼'}
+                                </span>
+                                <span>
+                                  {Math.abs(token.price_change_24h).toFixed(2)}%
+                                </span>
+                              </div>
+                            ) : (
+                              <span className="text-sm text-gray-500">-</span>
+                            )}
                           </td>
                           
                           {/* Supply */}
@@ -920,7 +1012,7 @@ export default function AssetsPage() {
                               className="group/holders inline-flex items-center gap-1 px-2 py-1.5 md:px-4 md:py-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10 hover:from-blue-500/20 hover:to-purple-500/20 border border-blue-500/20 hover:border-blue-500/40 rounded-lg transition-all hover:scale-105"
                             >
                               <span className="text-[10px] md:text-sm font-medium text-white group-hover/holders:text-blue-400 transition-colors whitespace-nowrap">
-                                {token.num_holders && token.num_holders >= 100 ? '100+' : token.num_holders || '-'}
+                                {token.num_holders ? token.num_holders.toLocaleString() : '-'}
                               </span>
                               <TrendingUp className="w-2.5 h-2.5 md:w-3 md:h-3 text-gray-500 group-hover/holders:text-blue-400 transition-colors flex-shrink-0" />
                             </Link>
@@ -1061,12 +1153,33 @@ export default function AssetsPage() {
                                 
                                 {/* Price Column */}
                                 <td className="hidden md:table-cell px-3 md:px-6 py-3 md:py-4 text-right">
-                                  <span className="text-xs md:text-sm text-gray-500">-</span>
+                                  {token.price_usd !== undefined ? (
+                                    <div className="text-xs md:text-sm font-medium text-white">
+                                      {token.price_usd.toFixed(8)} PAXI
+                                    </div>
+                                  ) : (
+                                    <span className="text-xs md:text-sm text-gray-500">-</span>
+                                  )}
                                 </td>
                                 
                                 {/* 24h Change Column */}
                                 <td className="hidden xl:table-cell px-6 py-4 text-right">
-                                  <span className="text-sm text-gray-500">-</span>
+                                  {token.price_change_24h !== undefined && token.price_change_24h !== 0 ? (
+                                    <div className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium ${
+                                      token.price_change_24h >= 0 
+                                        ? 'bg-green-500/10 text-green-400' 
+                                        : 'bg-red-500/10 text-red-400'
+                                    }`}>
+                                      <span className="text-xs">
+                                        {token.price_change_24h >= 0 ? '▲' : '▼'}
+                                      </span>
+                                      <span>
+                                        {Math.abs(token.price_change_24h).toFixed(2)}%
+                                      </span>
+                                    </div>
+                                  ) : (
+                                    <span className="text-sm text-gray-500">-</span>
+                                  )}
                                 </td>
                                 
                                 {/* Supply Column */}
@@ -1085,7 +1198,7 @@ export default function AssetsPage() {
                                 <td className="px-3 md:px-6 py-3 md:py-4 text-right">
                                   {token.num_holders !== undefined && token.num_holders > 0 ? (
                                     <div className="text-xs md:text-sm font-medium text-white">
-                                      {token.num_holders >= 100 ? '100+' : token.num_holders.toLocaleString()}
+                                      {token.num_holders.toLocaleString()}
                                     </div>
                                   ) : (
                                     <div className="text-xs md:text-sm font-medium text-gray-400">

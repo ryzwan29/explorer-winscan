@@ -79,7 +79,7 @@ async function tryVoteWithFallback(
   return { success: false, error: lastError || 'All vote methods failed' };
 }
 
-function calculateFee(chain: ChainData, gasLimit: string): { amount: Array<{ denom: string; amount: string }>; gas: string } {
+export function calculateFee(chain: ChainData, gasLimit: string): { amount: Array<{ denom: string; amount: string }>; gas: string } {
   const denom = chain.assets?.[0]?.base || 'uatom';
   const exponent = parseInt(String(chain.assets?.[0]?.exponent || '6'));
   

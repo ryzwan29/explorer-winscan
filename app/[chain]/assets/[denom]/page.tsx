@@ -82,14 +82,14 @@ export default function AssetDetailPage() {
           const [tokenInfoRes, marketingInfoRes, holdersRes] = await Promise.all([
             fetch(`/api/prc20-token-detail?contract=${encodeURIComponent(denom)}&query=token_info`),
             fetch(`/api/prc20-token-detail?contract=${encodeURIComponent(denom)}&query=marketing_info`),
-            fetch(`/api/prc20-token-detail?contract=${encodeURIComponent(denom)}&query=all_accounts`)
+            fetch(`/api/prc20-holders?contract=${encodeURIComponent(denom)}`)
           ]);
           
           const tokenInfo = tokenInfoRes.ok ? await tokenInfoRes.json() : null;
           const marketingInfo = marketingInfoRes.ok ? await marketingInfoRes.json() : null;
           const holdersData = holdersRes.ok ? await holdersRes.json() : null;
           
-          const numHolders = holdersData?.accounts?.length || 0;
+          const numHolders = holdersData?.count || 0;
           
           // Set logo URL
           if (marketingInfo?.logo?.url) {
@@ -121,7 +121,7 @@ export default function AssetDetailPage() {
                 ? (Number(tokenInfo.total_supply) / Math.pow(10, tokenInfo.decimals || 6)).toLocaleString('en-US')
                 : '0',
               holders: numHolders,
-              holders_type: numHolders >= 100 ? 'estimated' : 'total_accounts',
+              holders_type: 'prc20',
               price: null
             });
           }
@@ -353,7 +353,7 @@ export default function AssetDetailPage() {
               <div className="text-xs md:text-sm text-gray-400 mb-1">{t('assetDetail.holders')}</div>
               <div className="text-lg md:text-2xl font-bold text-blue-400">
                 {asset.holders && asset.holders > 0 
-                  ? (asset.holders >= 100 ? '100+' : asset.holders.toLocaleString())
+                  ? asset.holders.toLocaleString()
                   : '-'
                 }
               </div>
